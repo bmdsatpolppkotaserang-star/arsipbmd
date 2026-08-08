@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Arsip Digital BMD - Satpol PP</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Library OCR (Tesseract.js) untuk Scanner Teks Pintar -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 font-sans">
 
@@ -43,16 +45,19 @@
       </form>
     </div>
 
-    <!-- VIEW 2: DASHBOARD (AFTER LOGIN) -->
+    <!-- VIEW 2: DASHBOARD -->
     <div id="viewDashboard" class="hidden space-y-6">
 
       <!-- ACTION BUTTONS KHUSUS ADMIN -->
       <div id="adminPanel" class="hidden bg-blue-50 p-4 rounded-xl border border-blue-200 flex flex-wrap gap-3 items-center justify-between">
         <span class="text-sm font-semibold text-blue-900">Panel Pengelola / Admin:</span>
-        <div class="flex gap-2">
-          <button onclick="openModal('modalUpload')" class="bg-blue-700 hover:bg-blue-800 text-white text-sm px-4 py-2 rounded-lg font-medium shadow transition">+ Upload Berkas</button>
-          <button onclick="openModal('modalCategory')" class="bg-emerald-700 hover:bg-emerald-800 text-white text-sm px-4 py-2 rounded-lg font-medium shadow transition">+ Tempat Arsip (Kategori)</button>
-          <button onclick="openModal('modalUser')" class="bg-purple-700 hover:bg-purple-800 text-white text-sm px-4 py-2 rounded-lg font-medium shadow transition">+ Buat Akun Staf</button>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="openModal('modalUpload')" class="bg-blue-700 hover:bg-blue-800 text-white text-sm px-4 py-2 rounded-lg font-medium shadow transition flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Upload Berkas
+          </button>
+          <button onclick="openModal('modalCategory')" class="bg-emerald-700 hover:bg-emerald-800 text-white text-sm px-4 py-2 rounded-lg font-medium shadow transition">+ Tempat Arsip</button>
+          <button onclick="openModal('modalUser')" class="bg-purple-700 hover:bg-purple-800 text-white text-sm px-4 py-2 rounded-lg font-medium shadow transition">+ Akun Staf</button>
         </div>
       </div>
 
@@ -91,9 +96,7 @@
                 <th class="p-4 text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody id="tableBody" class="divide-y text-sm">
-              <!-- Data dimasukkan secara dinamis lewat JS -->
-            </tbody>
+            <tbody id="tableBody" class="divide-y text-sm"></tbody>
           </table>
         </div>
       </div>
@@ -102,14 +105,43 @@
 
   </div>
 
-  <!-- MODAL 1: UPLOAD DOKUMEN -->
-  <div id="modalUpload" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
-      <h3 class="font-bold text-lg text-slate-800">Upload Berkas Arsip BMD</h3>
+  <!-- MODAL 1: UPLOAD DOKUMEN (LENGKAP DENGAN SCANNER PINTAR) -->
+  <div id="modalUpload" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4 my-8">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-bold text-lg text-slate-800">Upload Berkas Arsip BMD</h3>
+        <button onclick="closeModal('modalUpload')" class="text-slate-400 hover:text-slate-600 font-bold">&times;</button>
+      </div>
+
+      <!-- FITUR SCANNER PINTAR (OCR & AUTO FILL) -->
+      <div class="bg-amber-50 p-3 rounded-lg border border-amber-200 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-amber-900 flex items-center gap-1">
+            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h0.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+            Scanner Pintar (Ekstrak Teks Otomatis)
+          </span>
+          <button type="button" onclick="startCameraScanner()" class="text-xs bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1 rounded shadow transition">
+            Scan Kamera
+          </button>
+        </div>
+        <p class="text-[11px] text-amber-700 leading-tight">Ambil/upload foto dokumen fisik untuk mendeteksi judul & tahun secara otomatis.</p>
+        
+        <!-- AREA PREVIEW KAMERA -->
+        <div id="cameraArea" class="hidden space-y-2 pt-2">
+          <video id="webcam" autoplay playsinline class="w-full rounded-lg border bg-black h-48 object-cover"></video>
+          <div class="flex gap-2">
+            <button type="button" onclick="captureAndScan()" class="w-full py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded">Ambil Foto & Scan</button>
+            <button type="button" onclick="stopCamera()" class="px-3 py-1.5 bg-slate-300 text-slate-700 text-xs font-semibold rounded">Batal</button>
+          </div>
+        </div>
+        <canvas id="snapshotCanvas" class="hidden"></canvas>
+      </div>
+
+      <!-- FORM UPLOAD -->
       <form onsubmit="submitUpload(event)" class="space-y-3">
         <div>
           <label class="block text-xs font-semibold mb-1">Judul Dokumen</label>
-          <input type="text" id="upJudul" required class="w-full px-3 py-2 border rounded-lg text-sm">
+          <input type="text" id="upJudul" required placeholder="Judul berkas..." class="w-full px-3 py-2 border rounded-lg text-sm">
         </div>
         <div>
           <label class="block text-xs font-semibold mb-1">Pilih Tempat Arsip / Kategori</label>
@@ -120,21 +152,27 @@
           <input type="number" id="upTahun" value="2026" required class="w-full px-3 py-2 border rounded-lg text-sm">
         </div>
         <div>
-          <label class="block text-xs font-semibold mb-1">Pilih File (PDF/Gambar/Excel)</label>
-          <input type="file" id="upFile" required class="w-full text-sm">
+          <label class="block text-xs font-semibold mb-1">Pilih File Berkas (PDF/Gambar)</label>
+          <input type="file" id="upFile" required onchange="autoScanFile(this)" class="w-full text-sm">
         </div>
-        <div class="flex justify-end gap-2 pt-2">
+
+        <!-- INDICATOR SCANNING STATUS -->
+        <div id="scanStatus" class="hidden text-xs text-blue-700 font-semibold animate-pulse">
+          ⏳ Mengagregasi & membaca teks dokumen fisik...
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t">
           <button type="button" onclick="closeModal('modalUpload')" class="px-4 py-2 border rounded-lg text-xs font-semibold">Batal</button>
-          <button type="submit" id="btnSubmitUpload" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-xs font-semibold">Upload</button>
+          <button type="submit" id="btnSubmitUpload" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-xs font-semibold">Upload Berkas</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL 2: TAMBAH KATEGORI KUSTOM -->
+  <!-- MODAL 2: TAMBAH KATEGORI -->
   <div id="modalCategory" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
-      <h3 class="font-bold text-lg text-slate-800">Tambah Kategori / Tempat Arsip</h3>
+      <h3 class="font-bold text-lg text-slate-800">Tambah Tempat Arsip / Kategori</h3>
       <form onsubmit="submitCategory(event)" class="space-y-3">
         <div>
           <label class="block text-xs font-semibold mb-1">Nama Tempat Arsip Baru</label>
@@ -180,14 +218,15 @@
     </div>
   </div>
 
-  <!-- LOGIC APPLIKASI (JAVASCRIPT) -->
+  <!-- LOGIC JAVASCRIPT -->
   <script>
-    // PASTE WEB APP URL APPS SCRIPT ANDA DI SINI
-    const API_URL = "https://script.google.com/macros/s/AKfycbzRjZq_r2Ibo9EIQJPMPsCBd7sfi1T2frN6SXnqEnl1A1xYJQNZJv5xHi7083Q_wjkr/exec";
+    // MASUKKAN WEB APP URL APPS SCRIPT ANDA DI SINI
+    const API_URL = "https://script.google.com/macros/s/AKfycbx.../exec";
 
     let currentUser = null;
     let globalCategories = [];
     let globalDocuments = [];
+    let videoStream = null;
 
     window.onload = function() {
       const savedUser = localStorage.getItem("bmd_user");
@@ -268,62 +307,38 @@
     }
 
     function renderTable(docs) {
-  const tbody = document.getElementById("tableBody");
-  document.getElementById("docCount").innerText = `${docs.length} Dokumen`;
+      const tbody = document.getElementById("tableBody");
+      document.getElementById("docCount").innerText = `${docs.length} Dokumen`;
 
-  if (docs.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">Tidak ada dokumen ditemukan.</td></tr>`;
-    return;
-  }
+      if(docs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">Tidak ada dokumen ditemukan.</td></tr>`;
+        return;
+      }
 
-  // Cek apakah pengguna saat ini adalah admin
-  const isAdmin = currentUser && currentUser.role === "admin";
+      const isAdmin = currentUser && currentUser.role === 'admin';
 
-  tbody.innerHTML = docs.map(d => `
-    <tr class="hover:bg-slate-50 border-b border-slate-100">
-      <td class="p-4 font-semibold text-blue-900">${d.judul}</td>
-      <td class="p-4"><span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded border border-blue-200">${d.kategori}</span></td>
-      <td class="p-4 font-mono text-slate-600">${d.tahun}</td>
-      <td class="p-4 text-xs text-slate-500">${d.uploaded_by}</td>
-      <td class="p-4 text-center">
-        <div class="flex items-center justify-center gap-2">
-          <a href="${d.file_url}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded inline-flex items-center gap-1 transition">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-            Unduh / Lihat
-          </a>
-          ${isAdmin ? `
-            <button onclick="deleteDoc('${d.id}')" class="bg-red-600 hover:bg-red-700 text-white text-xs px-2.5 py-1.5 rounded inline-flex items-center gap-1 transition">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-              Hapus
-            </button>
-          ` : ''}
-        </div>
-      </td>
-    </tr>
-  `).join("");
-}
-
-function deleteDoc(id) {
-  if (!confirm("Apakah Anda yakin ingin menghapus berkas ini dari database dan Google Drive?")) return;
-
-  fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({
-      action: "deleteDocument",
-      id: id
-    })
-  })
-  .then(res => res.json())
-  .then(res => {
-    if (res.status === "success") {
-      alert(res.message);
-      loadData(); // Reload tabel secara otomatis
-    } else {
-      alert("Gagal menghapus: " + res.message);
+      tbody.innerHTML = docs.map(d => `
+        <tr class="hover:bg-slate-50 border-b border-slate-100">
+          <td class="p-4 font-semibold text-blue-900">${d.judul}</td>
+          <td class="p-4"><span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded border border-blue-200">${d.kategori}</span></td>
+          <td class="p-4 font-mono text-slate-600">${d.tahun}</td>
+          <td class="p-4 text-xs text-slate-500">${d.uploaded_by}</td>
+          <td class="p-4 text-center">
+            <div class="flex items-center justify-center gap-2">
+              <a href="${d.file_url}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded inline-flex items-center gap-1 transition">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Unduh / Lihat
+              </a>
+              ${isAdmin ? `
+                <button onclick="deleteDoc('${d.id}')" class="bg-red-600 hover:bg-red-700 text-white text-xs px-2.5 py-1.5 rounded transition">
+                  Hapus
+                </button>
+              ` : ''}
+            </div>
+          </td>
+        </tr>
+      `).join("");
     }
-  })
-  .catch(err => alert("Terjadi kesalahan koneksi saat menghapus berkas."));
-}
 
     function filterData() {
       const keyword = document.getElementById("searchKeyword").value.toLowerCase();
@@ -340,6 +355,80 @@ function deleteDoc(id) {
       renderTable(filtered);
     }
 
+    /* --- FITUR SCANNER PINTAR (OCR & KAMERA) --- */
+    function startCameraScanner() {
+      const cameraArea = document.getElementById("cameraArea");
+      const video = document.getElementById("webcam");
+      cameraArea.classList.remove("hidden");
+
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+      .then(stream => {
+        videoStream = stream;
+        video.srcObject = stream;
+      })
+      .catch(err => alert("Kamera tidak dapat diakses: " + err.message));
+    }
+
+    function stopCamera() {
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+      }
+      document.getElementById("cameraArea").classList.add("hidden");
+    }
+
+    function captureAndScan() {
+      const video = document.getElementById("webcam");
+      const canvas = document.getElementById("snapshotCanvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      stopCamera();
+      
+      const imageUrl = canvas.toDataURL("image/png");
+      processOCR(imageUrl);
+    }
+
+    function autoScanFile(input) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      if (file.type.startsWith("image/")) {
+        processOCR(file);
+      }
+    }
+
+    function processOCR(imageSource) {
+      const scanStatus = document.getElementById("scanStatus");
+      scanStatus.classList.remove("hidden");
+
+      Tesseract.recognize(imageSource, 'ind+eng', {
+        logger: m => console.log(m)
+      }).then(({ data: { text } }) => {
+        scanStatus.classList.add("hidden");
+        
+        // Bersihkan hasil bacaan teks
+        const cleanedText = text.replace(/[\r\n]+/g, " ").trim();
+        if (cleanedText.length > 5) {
+          // Otomatis isi judul dari baris teratas
+          const autoTitle = cleanedText.substring(0, 60);
+          document.getElementById("upJudul").value = autoTitle;
+
+          // Deteksi tahun (4 digit angka, misal 2020-2029)
+          const yearMatch = cleanedText.match(/\b(20[0-9]{2})\b/);
+          if (yearMatch) {
+            document.getElementById("upTahun").value = yearMatch[1];
+          }
+
+          alert("✨ Scanner Berhasil!\nJudul & Tahun dokumen berhasil diekstrak otomatis.");
+        }
+      }).catch(err => {
+        scanStatus.classList.add("hidden");
+        console.error(err);
+      });
+    }
+
+    /* --- HANDLER UPLOAD, EDIT, HAPUS --- */
     function submitUpload(e) {
       e.preventDefault();
       const fileInput = document.getElementById("upFile").files[0];
@@ -370,11 +459,29 @@ function deleteDoc(id) {
           loadData();
         })
         .finally(() => {
-          btn.innerText = "Upload";
+          btn.innerText = "Upload Berkas";
           btn.disabled = false;
         });
       };
       reader.readAsDataURL(fileInput);
+    }
+
+    function deleteDoc(id) {
+      if (!confirm("Apakah Anda yakin ingin menghapus berkas ini dari database dan Google Drive?")) return;
+
+      fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "deleteDocument", id: id })
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.status === "success") {
+          alert(res.message);
+          loadData();
+        } else {
+          alert("Gagal menghapus: " + res.message);
+        }
+      });
     }
 
     function submitCategory(e) {
@@ -412,7 +519,10 @@ function deleteDoc(id) {
     }
 
     function openModal(id) { document.getElementById(id).classList.remove("hidden"); }
-    function closeModal(id) { document.getElementById(id).classList.add("hidden"); }
+    function closeModal(id) {
+      stopCamera();
+      document.getElementById(id).classList.add("hidden");
+    }
     function logout() {
       localStorage.removeItem("bmd_user");
       location.reload();
