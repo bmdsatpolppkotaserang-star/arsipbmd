@@ -7,769 +7,7 @@
   
   <!-- PWA Manifest & Meta -->
   <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#0f172a"><!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SI-ADI - Satpol PP</title>
-  
-  <!-- PWA Manifest & Meta -->
-  <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#0f172a">
-  <link rel="apple-touch-icon" href="icon-192.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts (Inter) -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Tesseract.js OCR -->
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-  </style>
-</head>
-<body class="bg-slate-50 min-h-screen text-slate-800 antialiased">
-
-<!-- NAVBAR -->
-  <header class="bg-slate-900 text-white shadow-md sticky top-0 z-40 border-b border-slate-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex justify-between items-center">
-      <div class="flex items-center gap-3">
-        <!-- KOTAK LOGO IKON (SUDAH DIPERBAIKI SEHINGGA TIDAK DOUBLE TEKS) -->
-        <div class="bg-blue-600 h-10 w-10 rounded-xl flex items-center justify-center font-bold text-white shadow-lg shadow-blue-600/30 shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-          </svg>
-        </div>
-        <div>
-          <h1 class="font-bold text-base sm:text-lg leading-tight tracking-wide">SI-ADI</h1>
-          <p class="text-xs text-slate-400 font-medium">Sistem Informasi Arsip Digital • Satpol PP</p>
-        </div>
-      </div>
-      
-      <div class="flex items-center gap-2">
-        <button id="btnInstallPWA" class="hidden text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg font-medium transition shadow-sm flex items-center gap-1">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-          Install App
-        </button>
-
-        <div id="navUser" class="hidden flex items-center gap-3">
-          <div class="flex items-center gap-2 bg-slate-800 border border-slate-700/60 px-3 py-1.5 rounded-lg">
-            <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-            <span id="userNameTag" class="text-xs sm:text-sm font-semibold text-slate-200"></span>
-          </div>
-          <button onclick="logout()" class="text-xs bg-rose-600/90 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg font-medium transition shadow-sm flex items-center gap-1">
-            Keluar
-          </button>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-
-    <!-- VIEW 1: LOGIN -->
-    <div id="viewLogin" class="max-w-md mx-auto my-12 bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
-      <div class="text-center mb-8">
-        <h2 class="text-2xl font-bold text-slate-900">Masuk ke SI-ADI</h2>
-        <p class="text-xs text-slate-500 mt-1">Silakan kelola arsip digital instansi Anda</p>
-      </div>
-
-      <form onsubmit="handleLogin(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Username</label>
-          <input type="text" id="loginUsername" required placeholder="Masukkan username" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm outline-none">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Password</label>
-          <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm outline-none">
-        </div>
-        <button type="submit" id="btnLogin" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-blue-600/25 text-sm">
-          Masuk Sistem
-        </button>
-      </form>
-    </div>
-
-    <!-- VIEW 2: DASHBOARD -->
-    <div id="viewDashboard" class="hidden space-y-6">
-
-      <!-- STATS -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
-          <div>
-            <p class="text-xs text-slate-500 font-medium">Total Dokumen</p>
-            <h4 id="statTotalDoc" class="text-xl font-bold text-slate-800">0</h4>
-          </div>
-        </div>
-        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
-          <div>
-            <p class="text-xs text-slate-500 font-medium">Kategori Tempat Arsip</p>
-            <h4 id="statTotalCat" class="text-xl font-bold text-slate-800">0</h4>
-          </div>
-        </div>
-        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
-          <div>
-            <p class="text-xs text-slate-500 font-medium">Hak Akses Anda</p>
-            <h4 id="statUserRole" class="text-xl font-bold text-slate-800 capitalize">-</h4>
-          </div>
-        </div>
-      </div>
-
-      <!-- ADMIN PANEL -->
-      <div id="adminPanel" class="hidden bg-slate-900 text-white p-5 rounded-2xl shadow-md flex flex-wrap gap-4 items-center justify-between">
-        <div>
-          <h3 class="font-bold text-base">Panel Pengelola Arsip</h3>
-          <p class="text-xs text-slate-300 mt-0.5">Akses cepat unggah arsip dan manajemen data instansi</p>
-        </div>
-        <div class="flex flex-wrap gap-2.5">
-          <button onclick="openModal('modalUpload')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-4 py-2.5 rounded-xl font-medium shadow-lg shadow-blue-600/30 flex items-center gap-1.5">
-            + Upload Berkas / Scan Kamera
-          </button>
-          <button onclick="openModal('modalCategory')" class="bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 text-xs px-3.5 py-2.5 rounded-xl font-medium">
-            + Tempat Arsip
-          </button>
-          <button onclick="openModal('modalUser')" class="bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 text-xs px-3.5 py-2.5 rounded-xl font-medium">
-            + Akun Staf
-          </button>
-        </div>
-      </div>
-
-      <!-- SEARCH & FILTER -->
-      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Cari Nama Dokumen</label>
-          <input type="text" id="searchKeyword" oninput="filterData()" placeholder="Ketik nama berkas..." class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none">
-        </div>
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Filter Kategori</label>
-          <select id="filterCategory" onchange="filterData()" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none bg-white">
-            <option value="">-- Semua Kategori --</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Filter Tahun</label>
-          <input type="number" id="filterYear" oninput="filterData()" placeholder="Contoh: 2026" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none">
-        </div>
-      </div>
-
-      <!-- TABEL DOKUMEN -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
-        <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-          <h3 class="font-bold text-slate-800 text-sm">Daftar Dokumen</h3>
-          <span id="docCount" class="text-xs bg-slate-200/70 text-slate-700 px-3 py-1 rounded-full font-semibold">0 Dokumen</span>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wider font-semibold border-b border-slate-100">
-                <th class="p-4">Nama Dokumen</th>
-                <th class="p-4">Tempat Arsip</th>
-                <th class="p-4">Tahun</th>
-                <th class="p-4">Pengunggah</th>
-                <th class="p-4 text-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody" class="divide-y divide-slate-100 text-sm"></tbody>
-          </table>
-        </div>
-      </div>
-
-    </div>
-
-  </main>
-
-  <!-- MODAL UPLOAD & SCANNER -->
-  <div id="modalUpload" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-5 sm:p-6 space-y-4 my-8 border border-slate-100">
-      <div class="flex justify-between items-center border-b pb-3">
-        <h3 class="font-bold text-base sm:text-lg text-slate-800">Upload / Scan Berkas Arsip</h3>
-        <button onclick="closeModal('modalUpload')" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1">&times;</button>
-      </div>
-
-      <!-- CAMERA SCANNER BOX -->
-      <div class="bg-amber-50/80 p-3.5 sm:p-4 rounded-xl border border-amber-200/80 space-y-3">
-        <div class="flex items-center justify-between gap-2">
-          <span class="text-xs font-bold text-amber-900 flex items-center gap-1">📷 Scan Kamera</span>
-          <button type="button" onclick="startCameraScanner()" class="text-xs bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg font-medium shadow-sm shrink-0">
-            Buka Kamera
-          </button>
-        </div>
-        <p class="text-[11px] text-amber-800 leading-snug">Foto dokumen fisik otomatis membaca teks sekaligus menjadikannya berkas upload.</p>
-        
-        <!-- CAMERA PREVIEW -->
-        <div id="cameraArea" class="hidden space-y-2 pt-1">
-          <div class="relative rounded-xl overflow-hidden border border-slate-700 bg-black">
-            <video id="webcam" autoplay playsinline class="w-full h-48 sm:h-52 object-cover"></video>
-          </div>
-          <div class="flex gap-2">
-            <button type="button" onclick="captureAndScan()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow">Foto & Ambil Berkas</button>
-            <button type="button" onclick="stopCamera()" class="px-3.5 py-2 bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg shrink-0">Batal</button>
-          </div>
-        </div>
-        <canvas id="snapshotCanvas" class="hidden"></canvas>
-      </div>
-
-      <!-- PANEL EFEK/FILTER CAMSCANNER (BARU) -->
-      <div id="camScannerEditor" class="hidden bg-slate-900 text-white p-4 rounded-xl space-y-3 border border-slate-700">
-        <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-          <span class="text-xs font-bold text-slate-200 flex items-center gap-1">✨ Filter Pembersih Dokumen (CamScanner)</span>
-          <span class="text-[10px] bg-blue-600/80 text-white px-2 py-0.5 rounded font-mono">Auto-Enhance</span>
-        </div>
-
-        <div class="flex justify-center bg-slate-950 p-2 rounded-lg border border-slate-800 max-h-52 overflow-hidden">
-          <canvas id="editorCanvas" class="max-w-full max-h-48 object-contain rounded"></canvas>
-        </div>
-
-        <!-- PILIHAN MODE FILTER -->
-        <div class="grid grid-cols-3 gap-2 text-center text-xs">
-          <button type="button" onclick="applyCamScannerFilter('bw')" class="p-2 bg-slate-800 hover:bg-blue-600 rounded-lg font-medium border border-slate-700 transition focus:ring-2 focus:ring-blue-500">
-            📄 B&W Tegas
-          </button>
-          <button type="button" onclick="applyCamScannerFilter('magic')" class="p-2 bg-slate-800 hover:bg-blue-600 rounded-lg font-medium border border-slate-700 transition focus:ring-2 focus:ring-blue-500">
-            🎨 Magic Color
-          </button>
-          <button type="button" onclick="applyCamScannerFilter('original')" class="p-2 bg-slate-800 hover:bg-blue-600 rounded-lg font-medium border border-slate-700 transition focus:ring-2 focus:ring-blue-500">
-            📷 Asli
-          </button>
-        </div>
-
-        <!-- ADJUSTMENT SLIDER MANUAL -->
-        <div class="grid grid-cols-2 gap-3 pt-1 text-[11px] text-slate-300">
-          <div>
-            <label class="block mb-1">Kecerahan: <span id="valBright">0</span></label>
-            <input type="range" id="sliderBright" min="-100" max="100" value="0" oninput="updateManualAdjust()" class="w-full h-1 bg-slate-700 rounded appearance-none cursor-pointer">
-          </div>
-          <div>
-            <label class="block mb-1">Kontras: <span id="valContrast">0</span></label>
-            <input type="range" id="sliderContrast" min="-100" max="100" value="0" oninput="updateManualAdjust()" class="w-full h-1 bg-slate-700 rounded appearance-none cursor-pointer">
-          </div>
-        </div>
-      </div>
-
-      <!-- PREVIEW HASIL FOTO KAMERA (RAPI DI HP) -->
-      <div id="scannedFilePreview" class="hidden bg-emerald-50 border border-emerald-200 p-3 rounded-xl flex items-center justify-between gap-2">
-        <div class="flex items-center gap-2 min-w-0">
-          <span class="text-xs font-bold text-emerald-800 shrink-0">✅ Ready:</span>
-          <span id="scannedFileName" class="text-xs text-emerald-700 font-mono italic truncate"></span>
-        </div>
-        <button type="button" onclick="clearScannedFile()" class="shrink-0 bg-rose-100 hover:bg-rose-200 text-rose-700 text-[11px] px-2.5 py-1 rounded-lg font-bold border border-rose-200 transition">
-          Hapus
-        </button>
-      </div>
-
-      <!-- FORM UPLOAD -->
-      <form onsubmit="submitUpload(event)" class="space-y-3.5">
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Judul Dokumen</label>
-          <input type="text" id="upJudul" required placeholder="Judul berkas..." class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm outline-none">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Pilih Tempat Arsip / Kategori</label>
-          <select id="upKategori" required class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm outline-none bg-white"></select>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Tahun Dokumen</label>
-          <input type="number" id="upTahun" value="2026" required class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm outline-none">
-        </div>
-        <div id="fileInputContainer">
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Pilih File (Atau Gunakan Hasil Kamera)</label>
-          <input type="file" id="upFile" onchange="autoScanFile(this)" class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 cursor-pointer">
-        </div>
-
-        <div id="scanStatus" class="hidden text-xs text-blue-700 font-semibold animate-pulse bg-blue-50 p-2.5 rounded-lg border border-blue-200 text-center">
-          ⏳ Membaca isi dokumen fisik...
-        </div>
-
-        <div class="flex justify-end gap-2 pt-3 border-t">
-          <button type="button" onclick="closeModal('modalUpload')" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-xs font-semibold">Batal</button>
-          <button type="submit" id="btnSubmitUpload" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-blue-600/20">Upload Berkas</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL KATEGORI -->
-  <div id="modalCategory" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-slate-100">
-      <h3 class="font-bold text-lg text-slate-800">Tambah Tempat Arsip Baru</h3>
-      <form onsubmit="submitCategory(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Tempat Arsip</label>
-          <input type="text" id="newCatName" placeholder="Contoh: SURAT KEPUTUS (SK)" required class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm outline-none">
-        </div>
-        <div class="flex justify-end gap-2 pt-2 border-t">
-          <button type="button" onclick="closeModal('modalCategory')" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-xs font-semibold">Batal</button>
-          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold">Simpan Kategori</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL USER -->
-  <div id="modalUser" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-slate-100">
-      <h3 class="font-bold text-lg text-slate-800">Buat Akun Pegawai / Staf</h3>
-      <form onsubmit="submitUser(event)" class="space-y-3.5">
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Lengkap</label>
-          <input type="text" id="uNama" required placeholder="Nama lengkap pegawai" class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm outline-none">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Username</label>
-          <input type="text" id="uUsername" required placeholder="Username akun" class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm outline-none">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
-          <input type="password" id="uPassword" required placeholder="••••••••" class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm outline-none">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Role / Hak Akses</label>
-          <select id="uRole" class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm outline-none bg-white">
-            <option value="user">User / Staf (Hanya Unduh)</option>
-            <option value="admin">Admin (Akses Penuh)</option>
-          </select>
-        </div>
-        <div class="flex justify-end gap-2 pt-3 border-t">
-          <button type="button" onclick="closeModal('modalUser')" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-xs font-semibold">Batal</button>
-          <button type="submit" class="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-semibold">Buat Akun</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbzRjZq_r2Ibo9EIQJPMPsCBd7sfi1T2frN6SXnqEnl1A1xYJQNZJv5xHi7083Q_wjkr/exec";
-
-    let currentUser = null;
-    let globalCategories = [];
-    let globalDocuments = [];
-    let videoStream = null;
-    let scannedImageBase64 = null;
-
-    // VARIABEL KHUSUS CAMSCANNER FILTER
-    let rawCapturedImage = null;
-    let currentFilterMode = 'magic';
-
-    window.onload = function() {
-      const savedUser = localStorage.getItem("bmd_user");
-      if (savedUser) {
-        currentUser = JSON.parse(savedUser);
-        initDashboard();
-      }
-    };
-
-    function handleLogin(e) {
-      e.preventDefault();
-      const btn = document.getElementById("btnLogin");
-      btn.innerText = "Memeriksa...";
-      btn.disabled = true;
-
-      fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "login",
-          username: document.getElementById("loginUsername").value,
-          password: document.getElementById("loginPassword").value
-        })
-      })
-      .then(res => res.json())
-      .then(res => {
-        if(res.status === "success") {
-          currentUser = res.user;
-          localStorage.setItem("bmd_user", JSON.stringify(currentUser));
-          initDashboard();
-        } else {
-          alert(res.message);
-        }
-      })
-      .catch(err => alert("Terjadi kesalahan koneksi"))
-      .finally(() => {
-        btn.innerText = "Masuk Sistem";
-        btn.disabled = false;
-      });
-    }
-
-    function initDashboard() {
-      document.getElementById("viewLogin").classList.add("hidden");
-      document.getElementById("viewDashboard").classList.remove("hidden");
-      document.getElementById("navUser").classList.remove("hidden");
-      document.getElementById("userNameTag").innerText = `${currentUser.nama}`;
-      document.getElementById("statUserRole").innerText = `${currentUser.role}`;
-
-      if(currentUser.role === "admin") {
-        document.getElementById("adminPanel").classList.remove("hidden");
-      }
-
-      loadData();
-    }
-
-    function loadData() {
-      fetch(`${API_URL}?action=getInitialData`)
-      .then(res => res.json())
-      .then(res => {
-        if(res.status === "success") {
-          globalCategories = res.categories;
-          globalDocuments = res.documents;
-          
-          document.getElementById("statTotalDoc").innerText = globalDocuments.length;
-          document.getElementById("statTotalCat").innerText = globalCategories.length;
-
-          populateCategories();
-          renderTable(globalDocuments);
-        }
-      });
-    }
-
-    function populateCategories() {
-      const filter = document.getElementById("filterCategory");
-      const upCat = document.getElementById("upKategori");
-      
-      filter.innerHTML = `<option value="">-- Semua Kategori --</option>`;
-      upCat.innerHTML = ``;
-
-      globalCategories.forEach(c => {
-        filter.innerHTML += `<option value="${c}">${c}</option>`;
-        upCat.innerHTML += `<option value="${c}">${c}</option>`;
-      });
-    }
-
-    function renderTable(docs) {
-      const tbody = document.getElementById("tableBody");
-      document.getElementById("docCount").innerText = `${docs.length} Dokumen`;
-
-      if(docs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400">Tidak ada dokumen ditemukan</td></tr>`;
-        return;
-      }
-
-      const isAdmin = currentUser && currentUser.role === 'admin';
-
-      tbody.innerHTML = docs.map(d => `
-        <tr class="hover:bg-slate-50 transition">
-          <td class="p-4 font-semibold text-slate-800">${d.judul}</td>
-          <td class="p-4"><span class="bg-blue-50 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-lg border border-blue-100">${d.kategori}</span></td>
-          <td class="p-4 font-mono text-xs text-slate-600">${d.tahun}</td>
-          <td class="p-4 text-xs text-slate-500">${d.uploaded_by}</td>
-          <td class="p-4 text-center">
-            <div class="flex items-center justify-center gap-2">
-              <a href="${d.file_url}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-lg inline-flex items-center gap-1 font-medium shadow-sm">
-                Unduh / Lihat
-              </a>
-              ${isAdmin ? `
-                <button onclick="deleteDoc('${d.id}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs px-2.5 py-1.5 rounded-lg font-medium">
-                  Hapus
-                </button>
-              ` : ''}
-            </div>
-          </td>
-        </tr>
-      `).join("");
-    }
-
-    function filterData() {
-      const keyword = document.getElementById("searchKeyword").value.toLowerCase();
-      const cat = document.getElementById("filterCategory").value;
-      const year = document.getElementById("filterYear").value;
-
-      const filtered = globalDocuments.filter(d => {
-        const matchKey = d.judul.toLowerCase().includes(keyword);
-        const matchCat = cat === "" || d.kategori === cat;
-        const matchYear = year === "" || d.tahun.toString() === year.toString();
-        return matchKey && matchCat && matchYear;
-      });
-
-      renderTable(filtered);
-    }
-
-    /* OCR & SCANNER FITUR */
-    function startCameraScanner() {
-      const cameraArea = document.getElementById("cameraArea");
-      const video = document.getElementById("webcam");
-      cameraArea.classList.remove("hidden");
-
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-      .then(stream => {
-        videoStream = stream;
-        video.srcObject = stream;
-      })
-      .catch(err => alert("Kamera tidak dapat diakses: " + err.message));
-    }
-
-    function stopCamera() {
-      if (videoStream) {
-        videoStream.getTracks().forEach(track => track.stop());
-      }
-      document.getElementById("cameraArea").classList.add("hidden");
-    }
-
-    function captureAndScan() {
-      const video = document.getElementById("webcam");
-      const canvas = document.getElementById("snapshotCanvas");
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      stopCamera();
-      
-      const img = new Image();
-      img.onload = function() {
-        rawCapturedImage = img;
-        document.getElementById("camScannerEditor").classList.remove("hidden");
-        applyCamScannerFilter('magic');
-      };
-      img.src = canvas.toDataURL("image/jpeg", 0.9);
-    }
-
-    /* ALGORITMA FILTER CAMSCANNER (PENGOLAH DOKUMEN) */
-    function applyCamScannerFilter(mode) {
-      if(!rawCapturedImage) return;
-      currentFilterMode = mode;
-
-      const canvas = document.getElementById("editorCanvas");
-      const ctx = canvas.getContext("2d");
-      canvas.width = rawCapturedImage.width;
-      canvas.height = rawCapturedImage.height;
-
-      ctx.drawImage(rawCapturedImage, 0, 0);
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imgData.data;
-
-      const manualBright = parseInt(document.getElementById("sliderBright").value);
-      const manualContrast = parseInt(document.getElementById("sliderContrast").value);
-      const contrastFactor = (259 * (manualContrast + 255)) / (255 * (259 - manualContrast));
-
-      for (let i = 0; i < data.length; i += 4) {
-        let r = data[i];
-        let g = data[i+1];
-        let b = data[i+2];
-
-        // Mode Black & White High Contrast
-        if (mode === 'bw') {
-          let gray = 0.299 * r + 0.587 * g + 0.114 * b;
-          gray = (gray - 128) * 1.6 + 128 + 20; // boost contrast
-          let finalVal = gray < 135 ? Math.max(0, gray - 40) : Math.min(255, gray + 50);
-          r = g = b = finalVal;
-        } 
-        // Mode Magic Color (Warna Jernih & Kertas Bersih)
-        else if (mode === 'magic') {
-          r = Math.min(255, Math.max(0, (r - 128) * 1.35 + 128 + 25));
-          g = Math.min(255, Math.max(0, (g - 128) * 1.35 + 128 + 25));
-          b = Math.min(255, Math.max(0, (b - 128) * 1.35 + 128 + 25));
-          let avg = (r + g + b) / 3;
-          if (avg > 185) { r = g = b = Math.min(255, avg + 35); }
-        }
-
-        // Apply Manual Slider Adjustment
-        if (manualBright !== 0) {
-          r += manualBright; g += manualBright; b += manualBright;
-        }
-        if (manualContrast !== 0) {
-          r = contrastFactor * (r - 128) + 128;
-          g = contrastFactor * (g - 128) + 128;
-          b = contrastFactor * (b - 128) + 128;
-        }
-
-        data[i] = Math.min(255, Math.max(0, r));
-        data[i+1] = Math.min(255, Math.max(0, g));
-        data[i+2] = Math.min(255, Math.max(0, b));
-      }
-
-      ctx.putImageData(imgData, 0, 0);
-
-      // Simpan Hasil Olahan
-      scannedImageBase64 = canvas.toDataURL("image/jpeg", 0.85);
-
-      document.getElementById("scannedFilePreview").classList.remove("hidden");
-      document.getElementById("scannedFileName").innerText = "camscan_" + Date.now() + ".jpg";
-      document.getElementById("upFile").required = false;
-
-      // Jalankan OCR pada Gambar yang Sudah Dibersihkan
-      processOCR(scannedImageBase64);
-    }
-
-    function updateManualAdjust() {
-      document.getElementById("valBright").innerText = document.getElementById("sliderBright").value;
-      document.getElementById("valContrast").innerText = document.getElementById("sliderContrast").value;
-      applyCamScannerFilter(currentFilterMode);
-    }
-
-    function clearScannedFile() {
-      scannedImageBase64 = null;
-      rawCapturedImage = null;
-      document.getElementById("camScannerEditor").classList.add("hidden");
-      document.getElementById("scannedFilePreview").classList.add("hidden");
-      document.getElementById("upFile").required = true;
-      document.getElementById("sliderBright").value = 0;
-      document.getElementById("sliderContrast").value = 0;
-      document.getElementById("valBright").innerText = "0";
-      document.getElementById("valContrast").innerText = "0";
-    }
-
-    function autoScanFile(input) {
-      if (!input.files || !input.files[0]) return;
-      const file = input.files[0];
-      if (file.type.startsWith("image/")) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const img = new Image();
-          img.onload = function() {
-            rawCapturedImage = img;
-            document.getElementById("camScannerEditor").classList.remove("hidden");
-            applyCamScannerFilter('magic');
-          };
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-
-    function processOCR(imageSource) {
-      const scanStatus = document.getElementById("scanStatus");
-      scanStatus.classList.remove("hidden");
-
-      Tesseract.recognize(imageSource, 'ind+eng', { logger: m => console.log(m) })
-      .then(({ data: { text } }) => {
-        scanStatus.classList.add("hidden");
-        const cleanedText = text.replace(/[\r\n]+/g, " ").trim();
-        if (cleanedText.length > 3) {
-          document.getElementById("upJudul").value = cleanedText.substring(0, 70);
-          const yearMatch = cleanedText.match(/\b(20[0-9]{2})\b/);
-          if (yearMatch) {
-            document.getElementById("upTahun").value = yearMatch[1];
-          }
-        }
-      })
-      .catch(err => {
-        scanStatus.classList.add("hidden");
-        console.error(err);
-      });
-    }
-
-    /* UPLOAD PROSES */
-    function submitUpload(e) {
-      e.preventDefault();
-      const btn = document.getElementById("btnSubmitUpload");
-      btn.innerText = "Mengunggah Berkass...";
-      btn.disabled = true;
-
-      const fileInput = document.getElementById("upFile").files[0];
-
-      if (scannedImageBase64) {
-        sendPayload({
-          name: "scan_dokumen_" + Date.now() + ".jpg",
-          type: "image/jpeg",
-          base64: scannedImageBase64
-        }, btn);
-      } else if (fileInput) {
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          sendPayload({
-            name: fileInput.name,
-            type: fileInput.type,
-            base64: evt.target.result
-          }, btn);
-        };
-        reader.readAsDataURL(fileInput);
-      } else {
-        alert("Pilih file atau ambil foto dokumen terlebih dahulu!");
-        btn.innerText = "Upload Berkas";
-        btn.disabled = false;
-      }
-    }
-
-    function sendPayload(fileData, btn) {
-      const payload = {
-        action: "uploadDocument",
-        judul: document.getElementById("upJudul").value,
-        kategori: document.getElementById("upKategori").value,
-        tahun: document.getElementById("upTahun").value,
-        uploaded_by: currentUser.nama,
-        file: fileData
-      };
-
-      fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
-      .then(r => r.json())
-      .then(res => {
-        alert(res.message);
-        clearScannedFile();
-        closeModal("modalUpload");
-        loadData();
-      })
-      .catch(err => alert("Gagal mengunggah berkas"))
-      .finally(() => {
-        btn.innerText = "Upload Berkas";
-        btn.disabled = false;
-      });
-    }
-
-    function deleteDoc(id) {
-      if (!confirm("Apakah Anda yakin ingin menghapus berkas ini?")) return;
-
-      fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "deleteDocument", id: id })
-      })
-      .then(res => res.json())
-      .then(res => {
-        if (res.status === "success") {
-          alert(res.message);
-          loadData();
-        } else {
-          alert("Gagal menghapus: " + res.message);
-        }
-      });
-    }
-
-    function submitCategory(e) {
-      e.preventDefault();
-      const name = document.getElementById("newCatName").value;
-      fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "addCategory", nama_kategori: name })
-      })
-      .then(r => r.json())
-      .then(res => {
-        alert(res.message);
-        closeModal("modalCategory");
-        loadData();
-      });
-    }
-
-    function submitUser(e) {
-      e.preventDefault();
-      fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "addUser",
-          nama: document.getElementById("uNama").value,
-          username: document.getElementById("uUsername").value,
-          password: document.getElementById("uPassword").value,
-          role: document.getElementById("uRole").value
-        })
-      })
-      .then(r => r.json())
-      .then(res => {
-        alert(res.message);
-        closeModal("modalUser");
-      });
-    }
-
-    function openModal(id) { document.getElementById(id).classList.remove("hidden"); }
-    function closeModal(id) {
-      stopCamera();
-      clearScannedFile();
-      document.getElementById(id).classList.add("hidden");
-    }
-    function logout() {
-      localStorage.removeItem("bmd_user");
-      location.reload();
-    }
-  </script>
-</body>
-</html>
   <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -942,20 +180,26 @@
       <!-- CAMERA SCANNER BOX -->
       <div class="bg-amber-50/80 p-3.5 sm:p-4 rounded-xl border border-amber-200/80 space-y-3">
         <div class="flex items-center justify-between gap-2">
-          <span class="text-xs font-bold text-amber-900 flex items-center gap-1">📷 Scan Kamera</span>
+          <span class="text-xs font-bold text-amber-900 flex items-center gap-1">📷 Scan Kamera CamScanner Mode</span>
           <button type="button" onclick="startCameraScanner()" class="text-xs bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg font-medium shadow-sm shrink-0">
             Buka Kamera
           </button>
         </div>
-        <p class="text-[11px] text-amber-800 leading-snug">Foto dokumen fisik otomatis membaca teks sekaligus menjadikannya berkas upload.</p>
+        <p class="text-[11px] text-amber-800 leading-snug">Foto dokumen fisik dengan pemrosesan efek CamScanner otomatis (penjernihan teks, tingkat kontras tinggi & OCR otomatis).</p>
         
         <!-- CAMERA PREVIEW -->
         <div id="cameraArea" class="hidden space-y-2 pt-1">
           <div class="relative rounded-xl overflow-hidden border border-slate-700 bg-black">
+            <!-- Bingkai bantu pemotongan CamScanner -->
+            <div class="absolute inset-4 border-2 border-dashed border-emerald-400/70 z-10 pointer-events-none rounded-lg flex items-center justify-center">
+              <span class="text-[10px] text-emerald-300 bg-black/60 px-2 py-0.5 rounded">Posisikan Dokumen di Sini</span>
+            </div>
             <video id="webcam" autoplay playsinline class="w-full h-48 sm:h-52 object-cover"></video>
           </div>
           <div class="flex gap-2">
-            <button type="button" onclick="captureAndScan()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow">Foto & Ambil Berkas</button>
+            <button type="button" onclick="captureAndScan()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow flex items-center justify-center gap-1">
+              ✨ Foto & Scan Jernih
+            </button>
             <button type="button" onclick="stopCamera()" class="px-3.5 py-2 bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg shrink-0">Batal</button>
           </div>
         </div>
@@ -965,7 +209,7 @@
       <!-- PREVIEW HASIL FOTO KAMERA (RAPI DI HP) -->
       <div id="scannedFilePreview" class="hidden bg-emerald-50 border border-emerald-200 p-3 rounded-xl flex items-center justify-between gap-2">
         <div class="flex items-center gap-2 min-w-0">
-          <span class="text-xs font-bold text-emerald-800 shrink-0">✅ Ready:</span>
+          <span class="text-xs font-bold text-emerald-800 shrink-0">✅ Ready (CamScanner Enhanced):</span>
           <span id="scannedFileName" class="text-xs text-emerald-700 font-mono italic truncate"></span>
         </div>
         <button type="button" onclick="clearScannedFile()" class="shrink-0 bg-rose-100 hover:bg-rose-200 text-rose-700 text-[11px] px-2.5 py-1 rounded-lg font-bold border border-rose-200 transition">
@@ -1214,20 +458,62 @@
       document.getElementById("cameraArea").classList.add("hidden");
     }
 
+    /* FUNGSI EFEK CAMSCANNER FILTER (AUTO ENHANCE, HIGH CONTRAST & SHARPNESS) */
+    function applyCamScannerFilter(ctx, width, height) {
+      const imageData = ctx.getImageData(0, 0, width, height);
+      const data = imageData.data;
+      
+      // Penyesuaian kontras tinggi & pencerahan latar belakang (Magic Color CamScanner)
+      const contrast = 1.35; // Meningkatkan kontras tulisan
+      const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+
+      for (let i = 0; i < data.length; i += 4) {
+        let r = data[i];
+        let g = data[i + 1];
+        let b = data[i + 2];
+
+        // Ubah ke grayscale internal untuk analisa kontras
+        let v = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+        // Hilangkan bayangan & jadikan kertas lebih putih netral
+        if (v > 120) {
+          r = Math.min(255, r * 1.18);
+          g = Math.min(255, g * 1.18);
+          b = Math.min(255, b * 1.18);
+        } else {
+          // Pekatkan tinta/karakter tulisan
+          r = Math.max(0, r * 0.75);
+          g = Math.max(0, g * 0.75);
+          b = Math.max(0, b * 0.75);
+        }
+
+        // Terapkan penyesuaian kontras
+        data[i]     = factor * (r - 128) + 128;
+        data[i + 1] = factor * (g - 128) + 128;
+        data[i + 2] = factor * (b - 128) + 128;
+      }
+      ctx.putImageData(imageData, 0, 0);
+    }
+
     function captureAndScan() {
       const video = document.getElementById("webcam");
       const canvas = document.getElementById("snapshotCanvas");
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext("2d");
+      
+      // Ambil gambar mentah dari webcam
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Terapkan Efek CamScanner (Enhancement Otomatis)
+      applyCamScannerFilter(ctx, canvas.width, canvas.height);
 
       stopCamera();
       
-      scannedImageBase64 = canvas.toDataURL("image/jpeg", 0.85);
+      scannedImageBase64 = canvas.toDataURL("image/jpeg", 0.90);
 
       document.getElementById("scannedFilePreview").classList.remove("hidden");
-      document.getElementById("scannedFileName").innerText = "scan_" + Date.now() + ".jpg";
+      document.getElementById("scannedFileName").innerText = "camscan_" + Date.now() + ".jpg";
       document.getElementById("upFile").required = false;
 
       processOCR(scannedImageBase64);
