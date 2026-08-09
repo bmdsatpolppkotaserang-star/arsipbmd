@@ -16,6 +16,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts (Inter) -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tesseract.js OCR -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
     body { font-family: 'Inter', sans-serif; }
   </style>
@@ -26,6 +28,7 @@
   <header class="bg-slate-900 text-white shadow-md sticky top-0 z-40 border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex justify-between items-center">
       <div class="flex items-center gap-3">
+        <!-- KOTAK SI-ADI -->
         <div class="bg-blue-600 h-10 px-3 min-w-[2.5rem] rounded-xl flex items-center justify-center font-bold text-xs sm:text-sm tracking-wider whitespace-nowrap shadow-lg shadow-blue-600/30 shrink-0">
           SI-ADI
         </div>
@@ -111,7 +114,7 @@
         </div>
         <div class="flex flex-wrap gap-2.5">
           <button onclick="openModal('modalUpload')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-4 py-2.5 rounded-xl font-medium shadow-lg shadow-blue-600/30 flex items-center gap-1.5">
-            + Upload Berkas / Scan HP
+            + Upload Berkas / Scan Google Drive
           </button>
           <button onclick="openModal('modalCategory')" class="bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 text-xs px-3.5 py-2.5 rounded-xl font-medium">
             + Tempat Arsip
@@ -166,7 +169,7 @@
 
   </main>
 
-  <!-- MODAL UPLOAD & NATIVE SCANNER -->
+  <!-- MODAL UPLOAD DENGAN GOOGLE DRIVE SCANNER -->
   <div id="modalUpload" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-5 sm:p-6 space-y-4 my-8 border border-slate-100">
       <div class="flex justify-between items-center border-b pb-3">
@@ -174,62 +177,52 @@
         <button onclick="closeModal('modalUpload')" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1">&times;</button>
       </div>
 
-      <!-- PANDUAN PINDAN NATIVE -->
-      <div class="bg-blue-50/80 p-3.5 rounded-xl border border-blue-200/80 text-xs text-blue-900 leading-relaxed">
-        <p class="font-bold flex items-center gap-1.5 mb-1 text-blue-950">
-          📱 Pemindaian Presisi Tinggi (Native Scanner)
-        </p>
-        <p class="text-[11px] text-blue-800">
-          Gunakan tombol di bawah untuk mengambil foto langsung dari Kamera HP atau memilih dokumen PDF/Gambar. Kamera HP Anda akan otomatis mendeteksi tepian, meratakan sudut, serta menjernihkan dokumen.
-        </p>
-      </div>
-
-      <!-- OPSE OPSI PILIHAN INPUT -->
-      <div class="grid grid-cols-2 gap-3">
-        <!-- Input 1: Kamera HP Langsung -->
-        <label class="cursor-pointer bg-slate-900 hover:bg-slate-800 text-white p-3.5 rounded-xl border border-slate-700 flex flex-col items-center justify-center gap-1.5 text-center transition shadow-sm group">
-          <svg class="w-6 h-6 text-emerald-400 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h0.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-          </svg>
-          <span class="text-xs font-semibold">Foto Dokumen (Kamera)</span>
-          <input type="file" id="cameraNativeInput" accept="image/*" capture="environment" onchange="handleFileSelect(this)" class="hidden">
-        </label>
-
-        <!-- Input 2: Pilih File (PDF / Gambar) -->
-        <label class="cursor-pointer bg-white hover:bg-slate-50 text-slate-800 p-3.5 rounded-xl border border-slate-200 flex flex-col items-center justify-center gap-1.5 text-center transition shadow-sm group">
-          <svg class="w-6 h-6 text-blue-600 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-          </svg>
-          <span class="text-xs font-semibold">Pilih PDF / File</span>
-          <input type="file" id="fileNativeInput" accept=".pdf,image/*" onchange="handleFileSelect(this)" class="hidden">
-        </label>
-      </div>
-
-      <!-- PREVIEW FILE TERPILIH -->
-      <div id="filePreviewBox" class="hidden bg-slate-100 border border-slate-200 p-3 rounded-xl flex items-center justify-between gap-2">
-        <div class="flex items-center gap-2 min-w-0">
-          <span id="fileTypeBadge" class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-600 text-white shrink-0">JPG</span>
-          <span id="previewFileName" class="text-xs text-slate-700 font-medium truncate"></span>
+      <!-- GOOGLE DRIVE SCANNER INTEGRATION BOX -->
+      <div class="bg-slate-900 text-white p-4 rounded-xl space-y-2 border border-slate-800">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+            ⚡ Scanner Google Drive
+          </span>
+          <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30 font-mono">PDF Presisi</span>
         </div>
-        <button type="button" onclick="clearSelectedFile()" class="shrink-0 bg-rose-100 hover:bg-rose-200 text-rose-700 text-[11px] px-2.5 py-1 rounded-lg font-bold border border-rose-200 transition">
-          Hapus
-        </button>
+        <p class="text-[11px] text-slate-300 leading-relaxed">
+          Pindai dokumen fisik dengan fitur Scanner Google Drive agar hasil jernih, simetris, dan rapi secara otomatis.
+        </p>
+
+        <a href="intent://drive.google.com/#Intent;scheme=https;package=com.google.android.apps.docs;action=android.media.action.IMAGE_CAPTURE;end" 
+           target="_blank"
+           class="mt-2 w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 px-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition shadow-md shadow-emerald-900/50">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h0.93a2 2 0 011.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+          </svg>
+          1. Buka Scanner Kamera Google Drive
+        </a>
       </div>
 
-      <!-- FORM UPLOAD -->
+      <!-- FORM UPLOAD FILE -->
       <form onsubmit="submitUpload(event)" class="space-y-3.5">
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Judul Dokumen</label>
-          <input type="text" id="upJudul" required placeholder="Ketik judul berkas secara manual..." class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm outline-none">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">2. Pilih File Hasil Scan (PDF / Gambar)</label>
+          <input type="file" id="upFile" required onchange="autoScanFile(this)" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-slate-200 rounded-xl p-1 cursor-pointer">
         </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Judul Dokumen</label>
+          <input type="text" id="upJudul" required placeholder="Judul berkas..." class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm outline-none">
+        </div>
+
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Pilih Tempat Arsip / Kategori</label>
           <select id="upKategori" required class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm outline-none bg-white"></select>
         </div>
+
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Tahun Dokumen</label>
           <input type="number" id="upTahun" value="2026" required class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm outline-none">
+        </div>
+
+        <div id="scanStatus" class="hidden text-xs text-blue-700 font-semibold animate-pulse bg-blue-50 p-2.5 rounded-lg border border-blue-200 text-center">
+          ⏳ Membaca isi teks dokumen...
         </div>
 
         <div class="flex justify-end gap-2 pt-3 border-t">
@@ -295,7 +288,6 @@
     let currentUser = null;
     let globalCategories = [];
     let globalDocuments = [];
-    let selectedFileObject = null;
 
     window.onload = function() {
       const savedUser = localStorage.getItem("bmd_user");
@@ -428,84 +420,85 @@
       renderTable(filtered);
     }
 
-    /* HANDLE FILE NATIVE INPUT */
-    function handleFileSelect(input) {
+    /* OCR OTOMATIS SAAT GAMBAR DIPILIH */
+    function autoScanFile(input) {
       if (!input.files || !input.files[0]) return;
-      
       const file = input.files[0];
-      selectedFileObject = file;
-
-      const previewBox = document.getElementById("filePreviewBox");
-      const fileNameTag = document.getElementById("previewFileName");
-      const badge = document.getElementById("fileTypeBadge");
-
-      fileNameTag.innerText = file.name;
-
-      if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
-        badge.innerText = "PDF";
-        badge.className = "text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-rose-600 text-white shrink-0";
-      } else {
-        badge.innerText = "GAMBAR";
-        badge.className = "text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-600 text-white shrink-0";
+      if (file.type.startsWith("image/")) {
+        processOCR(file);
       }
-
-      previewBox.classList.remove("hidden");
     }
 
-    function clearSelectedFile() {
-      selectedFileObject = null;
-      document.getElementById("cameraNativeInput").value = "";
-      document.getElementById("fileNativeInput").value = "";
-      document.getElementById("filePreviewBox").classList.add("hidden");
+    function processOCR(imageSource) {
+      const scanStatus = document.getElementById("scanStatus");
+      scanStatus.classList.remove("hidden");
+
+      Tesseract.recognize(imageSource, 'ind+eng', { logger: m => console.log(m) })
+      .then(({ data: { text } }) => {
+        scanStatus.classList.add("hidden");
+        const cleanedText = text.replace(/[\r\n]+/g, " ").trim();
+        if (cleanedText.length > 3) {
+          document.getElementById("upJudul").value = cleanedText.substring(0, 70);
+          const yearMatch = cleanedText.match(/\b(20[0-9]{2})\b/);
+          if (yearMatch) {
+            document.getElementById("upTahun").value = yearMatch[1];
+          }
+        }
+      })
+      .catch(err => {
+        scanStatus.classList.add("hidden");
+        console.error(err);
+      });
     }
 
-    /* SUBMIT UPLOAD PROSES */
+    /* UPLOAD PROSES */
     function submitUpload(e) {
       e.preventDefault();
-
-      if (!selectedFileObject) {
-        alert("Silakan ambil foto dokumen atau pilih berkas terlebih dahulu!");
-        return;
-      }
-
       const btn = document.getElementById("btnSubmitUpload");
       btn.innerText = "Mengunggah Berkas...";
       btn.disabled = true;
 
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        const filePayload = {
-          name: selectedFileObject.name,
-          type: selectedFileObject.type,
-          base64: evt.target.result
-        };
+      const fileInput = document.getElementById("upFile").files[0];
 
-        const payload = {
-          action: "uploadDocument",
-          judul: document.getElementById("upJudul").value,
-          kategori: document.getElementById("upKategori").value,
-          tahun: document.getElementById("upTahun").value,
-          uploaded_by: currentUser.nama,
-          file: filePayload
+      if (fileInput) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          sendPayload({
+            name: fileInput.name,
+            type: fileInput.type,
+            base64: evt.target.result
+          }, btn);
         };
+        reader.readAsDataURL(fileInput);
+      } else {
+        alert("Pilih berkas terlebih dahulu!");
+        btn.innerText = "Upload Berkas";
+        btn.disabled = false;
+      }
+    }
 
-        fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
-        .then(r => r.json())
-        .then(res => {
-          alert(res.message);
-          clearSelectedFile();
-          document.getElementById("upJudul").value = "";
-          closeModal("modalUpload");
-          loadData();
-        })
-        .catch(err => alert("Gagal mengunggah berkas"))
-        .finally(() => {
-          btn.innerText = "Upload Berkas";
-          btn.disabled = false;
-        });
+    function sendPayload(fileData, btn) {
+      const payload = {
+        action: "uploadDocument",
+        judul: document.getElementById("upJudul").value,
+        kategori: document.getElementById("upKategori").value,
+        tahun: document.getElementById("upTahun").value,
+        uploaded_by: currentUser.nama,
+        file: fileData
       };
 
-      reader.readAsDataURL(selectedFileObject);
+      fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
+      .then(r => r.json())
+      .then(res => {
+        alert(res.message);
+        closeModal("modalUpload");
+        loadData();
+      })
+      .catch(err => alert("Gagal mengunggah berkas"))
+      .finally(() => {
+        btn.innerText = "Upload Berkas";
+        btn.disabled = false;
+      });
     }
 
     function deleteDoc(id) {
