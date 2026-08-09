@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SI-ADI - Satpol PP</title>
+  
+  <!-- PWA Manifest & Meta -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="apple-touch-icon" href="maskable_icon_x192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts (Inter) -->
@@ -29,15 +37,24 @@
           <p class="text-xs text-slate-400 font-medium">Sistem Informasi Arsip Digital • Satpol PP</p>
         </div>
       </div>
-      <div id="navUser" class="hidden flex items-center gap-3">
-        <div class="flex items-center gap-2 bg-slate-800 border border-slate-700/60 px-3 py-1.5 rounded-lg">
-          <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-          <span id="userNameTag" class="text-xs sm:text-sm font-semibold text-slate-200"></span>
-        </div>
-        <button onclick="logout()" class="text-xs bg-rose-600/90 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg font-medium transition duration-200 shadow-sm flex items-center gap-1">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-          Keluar
+      
+      <div class="flex items-center gap-2">
+        <!-- Tombol Install PWA -->
+        <button id="btnInstallPWA" class="hidden text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg font-medium transition duration-200 shadow-sm flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          Install App
         </button>
+
+        <div id="navUser" class="hidden flex items-center gap-3">
+          <div class="flex items-center gap-2 bg-slate-800 border border-slate-700/60 px-3 py-1.5 rounded-lg">
+            <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+            <span id="userNameTag" class="text-xs sm:text-sm font-semibold text-slate-200"></span>
+          </div>
+          <button onclick="logout()" class="text-xs bg-rose-600/90 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg font-medium transition duration-200 shadow-sm flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+            Keluar
+          </button>
+        </div>
       </div>
     </div>
   </header>
@@ -301,6 +318,7 @@
     let globalCategories = [];
     let globalDocuments = [];
     let videoStream = null;
+    let deferredPrompt;
 
     window.onload = function() {
       const savedUser = localStorage.getItem("bmd_user");
@@ -309,6 +327,34 @@
         initDashboard();
       }
     };
+
+    /* REGISTRASI PWA & INSTALL PROMPT */
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('PWA Service Worker terdaftar:', reg.scope))
+          .catch((err) => console.error('Service Worker gagal:', err));
+      });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btnInstall = document.getElementById('btnInstallPWA');
+      if (btnInstall) {
+        btnInstall.classList.remove('hidden');
+        btnInstall.addEventListener('click', () => {
+          btnInstall.classList.add('hidden');
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+              console.log('User menginstal PWA');
+            }
+            deferredPrompt = null;
+          });
+        });
+      }
+    });
 
     function handleLogin(e) {
       e.preventDefault();
@@ -613,18 +659,6 @@
       localStorage.removeItem("bmd_user");
       location.reload();
     }
-    // Registrasi Service Worker untuk PWA
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then((reg) => {
-        console.log('PWA Service Worker berhasil didaftarkan:', reg.scope);
-      })
-      .catch((err) => {
-        console.error('PWA Service Worker gagal didaftarkan:', err);
-      });
-  });
-}
   </script>
 </body>
 </html>
