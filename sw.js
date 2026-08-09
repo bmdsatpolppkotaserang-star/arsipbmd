@@ -1,4 +1,4 @@
-const CACHE_NAME = 'si-adi-v3.2';
+const CACHE_NAME = 'si-adi-v3.3';
 
 // Daftar asset statis yang akan disimpan ke dalam cache lokal saat install
 const ASSETS_TO_CACHE = [
