@@ -16,11 +16,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts (Inter) -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- jscanify (CamScanner Computer Vision Processing) & OpenCV.js -->
-  <script async src="https://docs.opencv.org/4.7.0/opencv.js" type="text/javascript"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jscanify@0.0.12/dist/index.min.js"></script>
-  
   <!-- Tesseract.js OCR -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
@@ -185,34 +180,30 @@
       <!-- CAMERA SCANNER BOX -->
       <div class="bg-amber-50/80 p-3.5 sm:p-4 rounded-xl border border-amber-200/80 space-y-3">
         <div class="flex items-center justify-between gap-2">
-          <span class="text-xs font-bold text-amber-900 flex items-center gap-1">📷 Scan Kamera (Auto-Crop & Meluruskan)</span>
+          <span class="text-xs font-bold text-amber-900 flex items-center gap-1">📷 Scan Kamera</span>
           <button type="button" onclick="startCameraScanner()" class="text-xs bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg font-medium shadow-sm shrink-0">
             Buka Kamera
           </button>
         </div>
-        <p class="text-[11px] text-amber-800 leading-snug">Pastikan kertas dokumen berada di atas latar belakang berkontras (misal meja gelap) agar pemotongan otomatis maksimal.</p>
+        <p class="text-[11px] text-amber-800 leading-snug">Foto dokumen fisik otomatis membaca teks sekaligus menjadikannya berkas upload.</p>
         
-        <!-- CAMERA PREVIEW WITH CAMSCANNER OVERLAY -->
+        <!-- CAMERA PREVIEW -->
         <div id="cameraArea" class="hidden space-y-2 pt-1">
           <div class="relative rounded-xl overflow-hidden border border-slate-700 bg-black">
-            <video id="webcam" autoplay playsinline class="w-full h-52 sm:h-60 object-cover"></video>
-            <!-- Boundary Overlay ala CamScanner -->
-            <div class="absolute inset-4 border-2 border-dashed border-amber-400/80 rounded-lg pointer-events-none flex items-center justify-center">
-              <span class="text-[10px] bg-slate-900/70 text-amber-200 px-2 py-1 rounded font-medium backdrop-blur-xs">Posisikan Kertas Dalam Bingkai</span>
-            </div>
+            <video id="webcam" autoplay playsinline class="w-full h-48 sm:h-52 object-cover"></video>
           </div>
           <div class="flex gap-2">
-            <button type="button" onclick="captureAndScan()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow">Pindai & Proses Kertas</button>
+            <button type="button" onclick="captureAndScan()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow">Foto & Ambil Berkas</button>
             <button type="button" onclick="stopCamera()" class="px-3.5 py-2 bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg shrink-0">Batal</button>
           </div>
         </div>
         <canvas id="snapshotCanvas" class="hidden"></canvas>
       </div>
 
-      <!-- PREVIEW HASIL FOTO KAMERA -->
+      <!-- PREVIEW HASIL FOTO KAMERA (RAPI DI HP) -->
       <div id="scannedFilePreview" class="hidden bg-emerald-50 border border-emerald-200 p-3 rounded-xl flex items-center justify-between gap-2">
         <div class="flex items-center gap-2 min-w-0">
-          <span class="text-xs font-bold text-emerald-800 shrink-0">✅ Hasil Scan Scanned:</span>
+          <span class="text-xs font-bold text-emerald-800 shrink-0">✅ Ready:</span>
           <span id="scannedFileName" class="text-xs text-emerald-700 font-mono italic truncate"></span>
         </div>
         <button type="button" onclick="clearScannedFile()" class="shrink-0 bg-rose-100 hover:bg-rose-200 text-rose-700 text-[11px] px-2.5 py-1 rounded-lg font-bold border border-rose-200 transition">
@@ -240,7 +231,7 @@
         </div>
 
         <div id="scanStatus" class="hidden text-xs text-blue-700 font-semibold animate-pulse bg-blue-50 p-2.5 rounded-lg border border-blue-200 text-center">
-          ⏳ Memproses gambar & membaca isi dokumen fisik...
+          ⏳ Membaca isi dokumen fisik...
         </div>
 
         <div class="flex justify-end gap-2 pt-3 border-t">
@@ -308,16 +299,8 @@
     let globalDocuments = [];
     let videoStream = null;
     let scannedImageBase64 = null;
-    
-    // Inisialisasi jscanify engine
-    let scannerEngine = null;
 
     window.onload = function() {
-      // Inisialisasi jscanify jika pustaka sudah termuat
-      if (typeof jscanify !== 'undefined') {
-        scannerEngine = new jscanify();
-      }
-
       const savedUser = localStorage.getItem("bmd_user");
       if (savedUser) {
         currentUser = JSON.parse(savedUser);
@@ -403,81 +386,68 @@
     function renderTable(docs) {
       const tbody = document.getElementById("tableBody");
       document.getElementById("docCount").innerText = `${docs.length} Dokumen`;
-      tbody.innerHTML = "";
 
       if(docs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center p-8 text-slate-400">Tidak ada dokumen ditemukan</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400">Tidak ada dokumen ditemukan</td></tr>`;
         return;
       }
 
-      docs.forEach(d => {
-        const tr = document.createElement("tr");
-        tr.className = "hover:bg-slate-50/80 transition";
-        tr.innerHTML = `
-          <td class="p-4 font-semibold text-slate-800">${d.nama_dokumen}</td>
-          <td class="p-4"><span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg text-xs font-medium">${d.kategori}</span></td>
-          <td class="p-4 text-slate-600">${d.tahun}</td>
-          <td class="p-4 text-slate-600">${d.pengunggah}</td>
+      const isAdmin = currentUser && currentUser.role === 'admin';
+
+      tbody.innerHTML = docs.map(d => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="p-4 font-semibold text-slate-800">${d.judul}</td>
+          <td class="p-4"><span class="bg-blue-50 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-lg border border-blue-100">${d.kategori}</span></td>
+          <td class="p-4 font-mono text-xs text-slate-600">${d.tahun}</td>
+          <td class="p-4 text-xs text-slate-500">${d.uploaded_by}</td>
           <td class="p-4 text-center">
-            <a href="${d.url_file}" target="_blank" class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-1.5 rounded-lg font-semibold text-xs transition">
-              Lihat Dokumen
-            </a>
+            <div class="flex items-center justify-center gap-2">
+              <a href="${d.file_url}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-lg inline-flex items-center gap-1 font-medium shadow-sm">
+                Unduh / Lihat
+              </a>
+              ${isAdmin ? `
+                <button onclick="deleteDoc('${d.id}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs px-2.5 py-1.5 rounded-lg font-medium">
+                  Hapus
+                </button>
+              ` : ''}
+            </div>
           </td>
-        `;
-        tbody.appendChild(tr);
-      });
+        </tr>
+      `).join("");
     }
 
     function filterData() {
-      const kw = document.getElementById("searchKeyword").value.toLowerCase();
+      const keyword = document.getElementById("searchKeyword").value.toLowerCase();
       const cat = document.getElementById("filterCategory").value;
-      const yr = document.getElementById("filterYear").value;
+      const year = document.getElementById("filterYear").value;
 
       const filtered = globalDocuments.filter(d => {
-        const matchKw = d.nama_dokumen.toLowerCase().includes(kw);
+        const matchKey = d.judul.toLowerCase().includes(keyword);
         const matchCat = cat === "" || d.kategori === cat;
-        const matchYr = yr === "" || String(d.tahun) === String(yr);
-        return matchKw && matchCat && matchYr;
+        const matchYear = year === "" || d.tahun.toString() === year.toString();
+        return matchKey && matchCat && matchYear;
       });
 
       renderTable(filtered);
     }
 
-    // Modal Control
-    function openModal(id) {
-      document.getElementById(id).classList.remove("hidden");
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.add("hidden");
-      if(id === 'modalUpload') {
-        stopCamera();
-        clearScannedFile();
-      }
-    }
-
-    // --- FITUR CAMERA SCANNER DENGAN CAMSCANNER ENGINE (jscanify) ---
+    /* OCR & SCANNER FITUR */
     function startCameraScanner() {
+      const cameraArea = document.getElementById("cameraArea");
       const video = document.getElementById("webcam");
-      document.getElementById("cameraArea").classList.remove("hidden");
+      cameraArea.classList.remove("hidden");
 
-      navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } } 
-      })
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
       .then(stream => {
         videoStream = stream;
         video.srcObject = stream;
       })
-      .catch(err => {
-        alert("Tidak dapat mengakses kamera. Pastikan izin kamera telah diberikan.");
-        document.getElementById("cameraArea").classList.add("hidden");
-      });
+      .catch(err => alert("Kamera tidak dapat diakses: " + err.message));
     }
 
     function stopCamera() {
-      if(videoStream) {
+      if (videoStream) {
         videoStream.getTracks().forEach(track => track.stop());
-        videoStream = null;
       }
       document.getElementById("cameraArea").classList.add("hidden");
     }
@@ -485,194 +455,145 @@
     function captureAndScan() {
       const video = document.getElementById("webcam");
       const canvas = document.getElementById("snapshotCanvas");
-      const status = document.getElementById("scanStatus");
-      
-      canvas.width = video.videoWidth || 1280;
-      canvas.height = video.videoHeight || 720;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
       const ctx = canvas.getContext("2d");
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
       stopCamera();
+      
+      scannedImageBase64 = canvas.toDataURL("image/jpeg", 0.85);
 
-      status.innerText = "🔍 Memotong & meluruskan kertas (CamScanner mode)...";
-      status.classList.remove("hidden");
+      document.getElementById("scannedFilePreview").classList.remove("hidden");
+      document.getElementById("scannedFileName").innerText = "scan_" + Date.now() + ".jpg";
+      document.getElementById("upFile").required = false;
 
-      setTimeout(() => {
-        let finalCanvas = canvas;
-
-        // 1. Ekstraksi Dokumen & Perspective Correction menggunakan jscanify
-        try {
-          if (!scannerEngine && typeof jscanify !== 'undefined') {
-            scannerEngine = new jscanify();
-          }
-          if (scannerEngine) {
-            // Memotong kertas dan menyesuaikan sudut miring
-            finalCanvas = scannerEngine.extractPaper(canvas, canvas.width, canvas.height);
-          }
-        } catch(e) {
-          console.warn("Gagal mengekstrak kontur kertas, menggunakan gambar mentah:", e);
-        }
-
-        // 2. Filter Grayscale & High Contrast untuk hasil Tesseract tajam
-        finalCanvas = applyCamScannerFilter(finalCanvas);
-
-        scannedImageBase64 = finalCanvas.toDataURL("image/jpeg", 0.9);
-        const fileName = "scan_" + Date.now() + ".jpg";
-
-        document.getElementById("scannedFilePreview").classList.remove("hidden");
-        document.getElementById("scannedFileName").innerText = fileName;
-
-        // 3. Jalankan OCR Tesseract pada hasil gambar terpangkas
-        processOCR(scannedImageBase64);
-      }, 100);
-    }
-
-    // Filter Khusus Dokumen ala CamScanner (Hitam Putih Tajam)
-    function applyCamScannerFilter(inputCanvas) {
-      const ctx = inputCanvas.getContext('2d');
-      const imageData = ctx.getImageData(0, 0, inputCanvas.width, inputCanvas.height);
-      const data = imageData.data;
-
-      for (let i = 0; i < data.length; i += 4) {
-        // Luminance Grayscale formula
-        let gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-        
-        // Peningkatan kontras sederhana
-        gray = gray < 128 ? gray * 0.8 : Math.min(255, gray * 1.15);
-
-        data[i] = gray;     // R
-        data[i + 1] = gray; // G
-        data[i + 2] = gray; // B
-      }
-
-      ctx.putImageData(imageData, 0, 0);
-      return inputCanvas;
+      processOCR(scannedImageBase64);
     }
 
     function clearScannedFile() {
       scannedImageBase64 = null;
       document.getElementById("scannedFilePreview").classList.add("hidden");
-      document.getElementById("scannedFileName").innerText = "";
-      document.getElementById("upFile").value = "";
+      document.getElementById("upFile").required = true;
     }
 
     function autoScanFile(input) {
-      if(input.files && input.files[0]) {
-        const file = input.files[0];
-        if(!file.type.startsWith("image/")) return;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          processOCR(e.target.result);
-        };
-        reader.readAsDataURL(file);
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      if (file.type.startsWith("image/")) {
+        processOCR(file);
       }
     }
 
-    function processOCR(base64Image) {
-      const status = document.getElementById("scanStatus");
-      status.innerText = "⏳ Membaca isi teks dokumen fisik (OCR)...";
-      status.classList.remove("hidden");
+    function processOCR(imageSource) {
+      const scanStatus = document.getElementById("scanStatus");
+      scanStatus.classList.remove("hidden");
 
-      Tesseract.recognize(
-        base64Image,
-        'ind', // Bahasa Indonesia
-        { logger: m => console.log(m) }
-      ).then(({ data: { text } }) => {
-        status.classList.add("hidden");
-        if(text && text.trim().length > 0) {
-          const cleanText = text.replace(/\n+/g, " ").trim();
-          const judulInput = document.getElementById("upJudul");
-          if(!judulInput.value) {
-            judulInput.value = cleanText.substring(0, 60) + "...";
+      Tesseract.recognize(imageSource, 'ind+eng', { logger: m => console.log(m) })
+      .then(({ data: { text } }) => {
+        scanStatus.classList.add("hidden");
+        const cleanedText = text.replace(/[\r\n]+/g, " ").trim();
+        if (cleanedText.length > 3) {
+          document.getElementById("upJudul").value = cleanedText.substring(0, 70);
+          const yearMatch = cleanedText.match(/\b(20[0-9]{2})\b/);
+          if (yearMatch) {
+            document.getElementById("upTahun").value = yearMatch[1];
           }
         }
-      }).catch(err => {
+      })
+      .catch(err => {
+        scanStatus.classList.add("hidden");
         console.error(err);
-        status.classList.add("hidden");
       });
     }
 
-    // Submit Forms
+    /* UPLOAD PROSES */
     function submitUpload(e) {
       e.preventDefault();
       const btn = document.getElementById("btnSubmitUpload");
-      const fileInput = document.getElementById("upFile");
-
-      if(!scannedImageBase64 && (!fileInput.files || fileInput.files.length === 0)) {
-        alert("Silakan pilih file dokumen atau potret dari kamera!");
-        return;
-      }
-
-      btn.innerText = "Mengunggah...";
+      btn.innerText = "Mengunggah Berkass...";
       btn.disabled = true;
 
+      const fileInput = document.getElementById("upFile").files[0];
+
+      if (scannedImageBase64) {
+        sendPayload({
+          name: "scan_dokumen_" + Date.now() + ".jpg",
+          type: "image/jpeg",
+          base64: scannedImageBase64
+        }, btn);
+      } else if (fileInput) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          sendPayload({
+            name: fileInput.name,
+            type: fileInput.type,
+            base64: evt.target.result
+          }, btn);
+        };
+        reader.readAsDataURL(fileInput);
+      } else {
+        alert("Pilih file atau ambil foto dokumen terlebih dahulu!");
+        btn.innerText = "Upload Berkas";
+        btn.disabled = false;
+      }
+    }
+
+    function sendPayload(fileData, btn) {
       const payload = {
         action: "uploadDocument",
         judul: document.getElementById("upJudul").value,
         kategori: document.getElementById("upKategori").value,
         tahun: document.getElementById("upTahun").value,
-        pengunggah: currentUser.nama
+        uploaded_by: currentUser.nama,
+        file: fileData
       };
 
-      if(scannedImageBase64) {
-        payload.fileBase64 = scannedImageBase64;
-        payload.fileName = document.getElementById("scannedFileName").innerText;
-        sendUpload(payload, btn);
-      } else {
-        const file = fileInput.files[0];
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          payload.fileBase64 = evt.target.result;
-          payload.fileName = file.name;
-          sendUpload(payload, btn);
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-
-    function sendUpload(payload, btn) {
-      fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify(payload)
-      })
-      .then(res => res.json())
+      fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
+      .then(r => r.json())
       .then(res => {
-        if(res.status === "success") {
-          alert("Dokumen berhasil diunggah!");
-          closeModal('modalUpload');
-          loadData();
-        } else {
-          alert(res.message || "Gagal mengunggah");
-        }
+        alert(res.message);
+        clearScannedFile();
+        closeModal("modalUpload");
+        loadData();
       })
-      .catch(err => alert("Terjadi kesalahan server"))
+      .catch(err => alert("Gagal mengunggah berkas"))
       .finally(() => {
         btn.innerText = "Upload Berkas";
         btn.disabled = false;
       });
     }
 
-    function submitCategory(e) {
-      e.preventDefault();
-      const catName = document.getElementById("newCatName").value;
+    function deleteDoc(id) {
+      if (!confirm("Apakah Anda yakin ingin menghapus berkas ini?")) return;
 
       fetch(API_URL, {
         method: "POST",
-        body: JSON.stringify({
-          action: "addCategory",
-          nama_kategori: catName
-        })
+        body: JSON.stringify({ action: "deleteDocument", id: id })
       })
       .then(res => res.json())
       .then(res => {
-        if(res.status === "success") {
-          alert("Tempat arsip baru berhasil ditambahkan!");
-          closeModal('modalCategory');
-          document.getElementById("newCatName").value = "";
+        if (res.status === "success") {
+          alert(res.message);
           loadData();
         } else {
-          alert(res.message);
+          alert("Gagal menghapus: " + res.message);
         }
+      });
+    }
+
+    function submitCategory(e) {
+      e.preventDefault();
+      const name = document.getElementById("newCatName").value;
+      fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "addCategory", nama_kategori: name })
+      })
+      .then(r => r.json())
+      .then(res => {
+        alert(res.message);
+        closeModal("modalCategory");
+        loadData();
       });
     }
 
@@ -688,17 +609,18 @@
           role: document.getElementById("uRole").value
         })
       })
-      .then(res => res.json())
+      .then(r => r.json())
       .then(res => {
-        if(res.status === "success") {
-          alert("Akun staf berhasil dibuat!");
-          closeModal('modalUser');
-        } else {
-          alert(res.message);
-        }
+        alert(res.message);
+        closeModal("modalUser");
       });
     }
 
+    function openModal(id) { document.getElementById(id).classList.remove("hidden"); }
+    function closeModal(id) {
+      stopCamera();
+      document.getElementById(id).classList.add("hidden");
+    }
     function logout() {
       localStorage.removeItem("bmd_user");
       location.reload();
