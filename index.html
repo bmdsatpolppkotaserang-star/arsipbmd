@@ -3,216 +3,291 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SIADI- Satpol PP</title>
+  <title>SI-ADI - Satpol PP</title>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Library OCR (Tesseract.js) untuk Scanner Teks Pintar -->
+  <!-- Google Fonts (Inter) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tesseract.js OCR -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .glass-effect { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px); }
+  </style>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800 font-sans">
+<body class="bg-slate-50 min-h-screen text-slate-800 antialiased selection:bg-blue-500 selection:text-white">
 
   <!-- NAVBAR -->
-  <nav class="bg-blue-900 text-white shadow-lg sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+  <header class="bg-slate-900 text-white shadow-md sticky top-0 z-40 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex justify-between items-center">
       <div class="flex items-center gap-3">
-        <div class="bg-blue-700 p-2 rounded-lg font-bold">SI-ADI</div>
+        <div class="bg-blue-600 h-10 w-10 rounded-xl flex items-center justify-center font-bold text-lg shadow-lg shadow-blue-600/30">
+          ADI
+        </div>
         <div>
-          <h1 class="font-bold text-lg leading-tight">Sistem Informasi Arsip Digital</h1>
-          <p class="text-xs text-blue-200">Satuan Polisi Pamong Praja</p>
+          <h1 class="font-bold text-base sm:text-lg leading-tight tracking-wide">SI-ADI</h1>
+          <p class="text-xs text-slate-400 font-medium">Sistem Informasi Arsip Digital • Satpol PP</p>
         </div>
       </div>
-      <div id="navUser" class="hidden flex items-center gap-4">
-        <span id="userNameTag" class="text-sm bg-blue-800 px-3 py-1 rounded-full border border-blue-700"></span>
-        <button onclick="logout()" class="text-xs bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded font-medium transition">Logout</button>
+      <div id="navUser" class="hidden flex items-center gap-3">
+        <div class="flex items-center gap-2 bg-slate-800 border border-slate-700/60 px-3 py-1.5 rounded-lg">
+          <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+          <span id="userNameTag" class="text-xs sm:text-sm font-semibold text-slate-200"></span>
+        </div>
+        <button onclick="logout()" class="text-xs bg-rose-600/90 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg font-medium transition duration-200 shadow-sm flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+          Keluar
+        </button>
       </div>
     </div>
-  </nav>
+  </header>
 
-  <div class="max-w-7xl mx-auto px-4 py-6">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
 
     <!-- VIEW 1: LOGIN -->
-    <div id="viewLogin" class="max-w-md mx-auto my-12 bg-white p-8 rounded-xl shadow-md border border-slate-200">
-      <h2 class="text-2xl font-bold text-center text-blue-900 mb-6">Log in SI-ADI</h2>
+    <div id="viewLogin" class="max-w-md mx-auto my-12 bg-white p-8 rounded-2xl shadow-xl border border-slate-100 transition-all">
+      <div class="text-center mb-8">
+        <div class="inline-flex p-3 bg-blue-50 text-blue-600 rounded-2xl mb-3">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path></svg>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-900">Masuk ke SI-ADI</h2>
+        <p class="text-xs text-slate-500 mt-1">Silakan kelola arsip digital instansi Anda</p>
+      </div>
+
       <form onsubmit="handleLogin(event)" class="space-y-4">
         <div>
-          <label class="block text-sm font-semibold mb-1">Username</label>
-          <input type="text" id="loginUsername" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Username</label>
+          <input type="text" id="loginUsername" required placeholder="Masukkan username" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
         </div>
         <div>
-          <label class="block text-sm font-semibold mb-1">Password</label>
-          <input type="password" id="loginPassword" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Password</label>
+          <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
         </div>
-        <button type="submit" id="btnLogin" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2.5 rounded-lg transition">Masuk</button>
+        <button type="submit" id="btnLogin" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition duration-200 shadow-lg shadow-blue-600/25 flex justify-center items-center gap-2 text-sm">
+          Masuk Sistem
+        </button>
       </form>
     </div>
 
     <!-- VIEW 2: DASHBOARD -->
     <div id="viewDashboard" class="hidden space-y-6">
 
-      <!-- ACTION BUTTONS KHUSUS ADMIN -->
-      <div id="adminPanel" class="hidden bg-blue-50 p-4 rounded-xl border border-blue-200 flex flex-wrap gap-3 items-center justify-between">
-        <span class="text-sm font-semibold text-blue-900">Panel Pengelola / Admin:</span>
-        <div class="flex flex-wrap gap-2">
-          <button onclick="openModal('modalUpload')" class="bg-blue-700 hover:bg-blue-800 text-white text-sm px-4 py-2 rounded-lg font-medium shadow transition flex items-center gap-1.5">
+      <!-- STATS SUMMARY CARDS -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+          <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 font-medium">Total Dokumen</p>
+            <h4 id="statTotalDoc" class="text-xl font-bold text-slate-800">0</h4>
+          </div>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+          <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 font-medium">Kategori Tempat Arsip</p>
+            <h4 id="statTotalCat" class="text-xl font-bold text-slate-800">0</h4>
+          </div>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+          <div class="p-3 bg-purple-50 text-purple-600 rounded-xl">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 font-medium">Hak Akses Anda</p>
+            <h4 id="statUserRole" class="text-xl font-bold text-slate-800 capitalize">-</h4>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN CONTROL PANEL -->
+      <div id="adminPanel" class="hidden bg-gradient-to-r from-slate-900 to-blue-950 text-white p-5 rounded-2xl shadow-md flex flex-wrap gap-4 items-center justify-between border border-slate-800">
+        <div>
+          <h3 class="font-bold text-base flex items-center gap-2">
+            <span class="bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Admin</span>
+            Panel Pengelola Arsip
+          </h3>
+          <p class="text-xs text-slate-300 mt-0.5">Akses cepat unggah arsip dan manajemen data instansi</p>
+        </div>
+        <div class="flex flex-wrap gap-2.5">
+          <button onclick="openModal('modalUpload')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-4 py-2.5 rounded-xl font-medium transition shadow-lg shadow-blue-600/30 flex items-center gap-1.5">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             Upload Berkas
           </button>
-          <button onclick="openModal('modalCategory')" class="bg-emerald-700 hover:bg-emerald-800 text-white text-sm px-4 py-2 rounded-lg font-medium shadow transition">+ Tempat Arsip</button>
-          <button onclick="openModal('modalUser')" class="bg-purple-700 hover:bg-purple-800 text-white text-sm px-4 py-2 rounded-lg font-medium shadow transition">+ Akun Staf</button>
+          <button onclick="openModal('modalCategory')" class="bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 text-xs px-3.5 py-2.5 rounded-xl font-medium transition">
+            + Tempat Arsip
+          </button>
+          <button onclick="openModal('modalUser')" class="bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 text-xs px-3.5 py-2.5 rounded-xl font-medium transition">
+            + Akun Staf
+          </button>
         </div>
       </div>
 
       <!-- FILTER & SEARCH BAR -->
-      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 md:grid-cols-3 gap-3">
         <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1">Cari Nama Dokumen</label>
-          <input type="text" id="searchKeyword" oninput="filterData()" placeholder="Ketik nama berkas..." class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+          <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Cari Nama Dokumen</label>
+          <div class="relative">
+            <input type="text" id="searchKeyword" oninput="filterData()" placeholder="Ketik nama berkas..." class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 transition">
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1">Filter Tempat Arsip / Kategori</label>
-          <select id="filterCategory" onchange="filterData()" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+          <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Filter Kategori / Tempat</label>
+          <select id="filterCategory" onchange="filterData()" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 transition bg-white">
             <option value="">-- Semua Kategori --</option>
           </select>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1">Filter Tahun</label>
-          <input type="number" id="filterYear" oninput="filterData()" placeholder="Contoh: 2026" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+          <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Filter Tahun</label>
+          <input type="number" id="filterYear" oninput="filterData()" placeholder="Contoh: 2026" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 transition">
         </div>
       </div>
 
       <!-- TABEL DAFTAR ARSIP -->
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="p-4 border-b bg-slate-50 flex justify-between items-center">
-          <h3 class="font-bold text-slate-700">Daftar Dokumen</h3>
-          <span id="docCount" class="text-xs bg-slate-200 px-2.5 py-1 rounded-full font-medium">0 Dokumen</span>
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+          <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+            Daftar Dokumen
+          </h3>
+          <span id="docCount" class="text-xs bg-slate-200/70 text-slate-700 px-3 py-1 rounded-full font-semibold">0 Dokumen</span>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
-              <tr class="bg-slate-100 text-slate-600 text-xs uppercase font-semibold border-b">
+              <tr class="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wider font-semibold border-b border-slate-100">
                 <th class="p-4">Nama Dokumen</th>
-                <th class="p-4">Kategori / Tempat</th>
+                <th class="p-4">Tempat Arsip</th>
                 <th class="p-4">Tahun</th>
                 <th class="p-4">Pengunggah</th>
                 <th class="p-4 text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody id="tableBody" class="divide-y text-sm"></tbody>
+            <tbody id="tableBody" class="divide-y divide-slate-100 text-sm"></tbody>
           </table>
         </div>
       </div>
 
     </div>
 
-  </div>
+  </main>
 
-  <!-- MODAL 1: UPLOAD DOKUMEN (LENGKAP DENGAN SCANNER PINTAR) -->
-  <div id="modalUpload" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4 my-8">
+  <!-- MODAL 1: UPLOAD DOKUMEN + OCR SCANNER -->
+  <div id="modalUpload" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto transition-opacity">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-5 my-8 border border-slate-100">
       <div class="flex justify-between items-center border-b pb-3">
         <h3 class="font-bold text-lg text-slate-800">Upload Berkas Arsip</h3>
-        <button onclick="closeModal('modalUpload')" class="text-slate-400 hover:text-slate-600 font-bold">&times;</button>
+        <button onclick="closeModal('modalUpload')" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1">&times;</button>
       </div>
 
-      <!-- FITUR SCANNER PINTAR (OCR & AUTO FILL) -->
-      <div class="bg-amber-50 p-3 rounded-lg border border-amber-200 space-y-2">
+      <!-- FITUR SCANNER PINTAR -->
+      <div class="bg-amber-50/80 p-4 rounded-xl border border-amber-200/80 space-y-3">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-amber-900 flex items-center gap-1">
+          <span class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
             <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h0.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
-            Scanner Pintar (Ekstrak Teks Otomatis)
+            Scanner Pintar (Ekstrak Teks OCR)
           </span>
-          <button type="button" onclick="startCameraScanner()" class="text-xs bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1 rounded shadow transition">
+          <button type="button" onclick="startCameraScanner()" class="text-xs bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg font-medium shadow-sm transition">
             Scan Kamera
           </button>
         </div>
-        <p class="text-[11px] text-amber-700 leading-tight">Ambil/upload foto dokumen fisik untuk mendeteksi judul & tahun secara otomatis.</p>
+        <p class="text-[11px] text-amber-800 leading-relaxed">Ambil/upload foto berkas fisik untuk mendeteksi judul & tahun secara otomatis.</p>
         
-        <!-- AREA PREVIEW KAMERA -->
+        <!-- CAMERA PREVIEW AREA -->
         <div id="cameraArea" class="hidden space-y-2 pt-2">
-          <video id="webcam" autoplay playsinline class="w-full rounded-lg border bg-black h-48 object-cover"></video>
+          <div class="relative rounded-xl overflow-hidden border border-slate-700 bg-black">
+            <video id="webcam" autoplay playsinline class="w-full h-52 object-cover"></video>
+            <div class="absolute inset-4 border-2 border-dashed border-amber-400/70 rounded-lg pointer-events-none flex items-center justify-center">
+              <span class="text-[10px] bg-black/60 text-amber-200 px-2 py-0.5 rounded">Posisikan Dokumen di Sini</span>
+            </div>
+          </div>
           <div class="flex gap-2">
-            <button type="button" onclick="captureAndScan()" class="w-full py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded">Ambil Foto & Scan</button>
-            <button type="button" onclick="stopCamera()" class="px-3 py-1.5 bg-slate-300 text-slate-700 text-xs font-semibold rounded">Batal</button>
+            <button type="button" onclick="captureAndScan()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow transition">Ambil Foto & Scan</button>
+            <button type="button" onclick="stopCamera()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold rounded-lg transition">Batal</button>
           </div>
         </div>
         <canvas id="snapshotCanvas" class="hidden"></canvas>
       </div>
 
       <!-- FORM UPLOAD -->
-      <form onsubmit="submitUpload(event)" class="space-y-3">
+      <form onsubmit="submitUpload(event)" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold mb-1">Judul Dokumen</label>
-          <input type="text" id="upJudul" required placeholder="Judul berkas..." class="w-full px-3 py-2 border rounded-lg text-sm">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Judul Dokumen</label>
+          <input type="text" id="upJudul" required placeholder="Judul berkas..." class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
         <div>
-          <label class="block text-xs font-semibold mb-1">Pilih Tempat Arsip / Kategori</label>
-          <select id="upKategori" required class="w-full px-3 py-2 border rounded-lg text-sm"></select>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Pilih Tempat Arsip / Kategori</label>
+          <select id="upKategori" required class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"></select>
         </div>
         <div>
-          <label class="block text-xs font-semibold mb-1">Tahun Dokumen</label>
-          <input type="number" id="upTahun" value="2026" required class="w-full px-3 py-2 border rounded-lg text-sm">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Tahun Dokumen</label>
+          <input type="number" id="upTahun" value="2026" required class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
         <div>
-          <label class="block text-xs font-semibold mb-1">Pilih File Berkas (PDF/Gambar)</label>
-          <input type="file" id="upFile" required onchange="autoScanFile(this)" class="w-full text-sm">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">File Berkas (PDF/Gambar)</label>
+          <input type="file" id="upFile" required onchange="autoScanFile(this)" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
         </div>
 
-        <!-- INDICATOR SCANNING STATUS -->
-        <div id="scanStatus" class="hidden text-xs text-blue-700 font-semibold animate-pulse">
+        <!-- SCANNING INDICATOR -->
+        <div id="scanStatus" class="hidden text-xs text-blue-700 font-semibold animate-pulse bg-blue-50 p-2.5 rounded-lg border border-blue-200 text-center">
           ⏳ Mengagregasi & membaca teks dokumen fisik...
         </div>
 
-        <div class="flex justify-end gap-2 pt-2 border-t">
-          <button type="button" onclick="closeModal('modalUpload')" class="px-4 py-2 border rounded-lg text-xs font-semibold">Batal</button>
-          <button type="submit" id="btnSubmitUpload" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-xs font-semibold">Upload Berkas</button>
+        <div class="flex justify-end gap-2 pt-3 border-t">
+          <button type="button" onclick="closeModal('modalUpload')" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-xs font-semibold hover:bg-slate-50 transition">Batal</button>
+          <button type="submit" id="btnSubmitUpload" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-blue-600/20 transition">Upload Berkas</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- MODAL 2: TAMBAH KATEGORI -->
-  <div id="modalCategory" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
-      <h3 class="font-bold text-lg text-slate-800">Tambah Tempat Arsip / Kategori</h3>
-      <form onsubmit="submitCategory(event)" class="space-y-3">
+  <div id="modalCategory" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-slate-100">
+      <h3 class="font-bold text-lg text-slate-800">Tambah Tempat Arsip Baru</h3>
+      <form onsubmit="submitCategory(event)" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold mb-1">Nama Tempat Arsip Baru</label>
-          <input type="text" id="newCatName" placeholder="Contoh: SERTIFIKAT TANAH SATPOL PP" required class="w-full px-3 py-2 border rounded-lg text-sm">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Tempat Arsip</label>
+          <input type="text" id="newCatName" placeholder="Contoh: SERTIFIKAT TANAH SATPOL PP" required class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="closeModal('modalCategory')" class="px-4 py-2 border rounded-lg text-xs font-semibold">Batal</button>
-          <button type="submit" class="px-4 py-2 bg-emerald-700 text-white rounded-lg text-xs font-semibold">Simpan Kategori</button>
+        <div class="flex justify-end gap-2 pt-2 border-t">
+          <button type="button" onclick="closeModal('modalCategory')" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-xs font-semibold hover:bg-slate-50 transition">Batal</button>
+          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-emerald-600/20 transition">Simpan Kategori</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- MODAL 3: TAMBAH USER -->
-  <div id="modalUser" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
-      <h3 class="font-bold text-lg text-slate-800">Buat Akun Pegawai/Staf Baru</h3>
-      <form onsubmit="submitUser(event)" class="space-y-3">
+  <div id="modalUser" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-slate-100">
+      <h3 class="font-bold text-lg text-slate-800">Buat Akun Pegawai / Staf</h3>
+      <form onsubmit="submitUser(event)" class="space-y-3.5">
         <div>
-          <label class="block text-xs font-semibold mb-1">Nama Lengkap</label>
-          <input type="text" id="uNama" required class="w-full px-3 py-2 border rounded-lg text-sm">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Lengkap</label>
+          <input type="text" id="uNama" required placeholder="Nama lengkap pegawai" class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
         <div>
-          <label class="block text-xs font-semibold mb-1">Username</label>
-          <input type="text" id="uUsername" required class="w-full px-3 py-2 border rounded-lg text-sm">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Username</label>
+          <input type="text" id="uUsername" required placeholder="Username akun" class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
         <div>
-          <label class="block text-xs font-semibold mb-1">Password</label>
-          <input type="password" id="uPassword" required class="w-full px-3 py-2 border rounded-lg text-sm">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+          <input type="password" id="uPassword" required placeholder="••••••••" class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
         <div>
-          <label class="block text-xs font-semibold mb-1">Role / Hak Akses</label>
-          <select id="uRole" class="w-full px-3 py-2 border rounded-lg text-sm">
-            <option value="user">User / Staf (Hanya Download)</option>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Role / Hak Akses</label>
+          <select id="uRole" class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+            <option value="user">User / Staf (Hanya Unduh)</option>
             <option value="admin">Admin (Akses Penuh)</option>
           </select>
         </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="closeModal('modalUser')" class="px-4 py-2 border rounded-lg text-xs font-semibold">Batal</button>
-          <button type="submit" class="px-4 py-2 bg-purple-700 text-white rounded-lg text-xs font-semibold">Buat Akun</button>
+        <div class="flex justify-end gap-2 pt-3 border-t">
+          <button type="button" onclick="closeModal('modalUser')" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-xs font-semibold hover:bg-slate-50 transition">Batal</button>
+          <button type="submit" class="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-purple-600/20 transition">Buat Akun</button>
         </div>
       </form>
     </div>
@@ -220,7 +295,6 @@
 
   <!-- LOGIC JAVASCRIPT -->
   <script>
-    // MASUKKAN WEB APP URL APPS SCRIPT ANDA DI SINI
     const API_URL = "https://script.google.com/macros/s/AKfycbzRjZq_r2Ibo9EIQJPMPsCBd7sfi1T2frN6SXnqEnl1A1xYJQNZJv5xHi7083Q_wjkr/exec";
 
     let currentUser = null;
@@ -260,9 +334,9 @@
           alert(res.message);
         }
       })
-      .catch(err => alert("Terjadi kesalahan koneksi"))
+      .catch(err => alert("Terjadi kesalahan koneksi ke server"))
       .finally(() => {
-        btn.innerText = "Masuk System";
+        btn.innerText = "Masuk Sistem";
         btn.disabled = false;
       });
     }
@@ -271,7 +345,8 @@
       document.getElementById("viewLogin").classList.add("hidden");
       document.getElementById("viewDashboard").classList.remove("hidden");
       document.getElementById("navUser").classList.remove("hidden");
-      document.getElementById("userNameTag").innerText = `${currentUser.nama} (${currentUser.role.toUpperCase()})`;
+      document.getElementById("userNameTag").innerText = `${currentUser.nama}`;
+      document.getElementById("statUserRole").innerText = `${currentUser.role}`;
 
       if(currentUser.role === "admin") {
         document.getElementById("adminPanel").classList.remove("hidden");
@@ -287,6 +362,10 @@
         if(res.status === "success") {
           globalCategories = res.categories;
           globalDocuments = res.documents;
+          
+          document.getElementById("statTotalDoc").innerText = globalDocuments.length;
+          document.getElementById("statTotalCat").innerText = globalCategories.length;
+
           populateCategories();
           renderTable(globalDocuments);
         }
@@ -311,26 +390,36 @@
       document.getElementById("docCount").innerText = `${docs.length} Dokumen`;
 
       if(docs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">Tidak ada dokumen ditemukan.</td></tr>`;
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="p-8 text-center text-slate-400">
+              <svg class="w-12 h-12 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path></svg>
+              <p class="font-medium text-sm text-slate-500">Tidak ada dokumen ditemukan</p>
+            </td>
+          </tr>`;
         return;
       }
 
       const isAdmin = currentUser && currentUser.role === 'admin';
 
       tbody.innerHTML = docs.map(d => `
-        <tr class="hover:bg-slate-50 border-b border-slate-100">
-          <td class="p-4 font-semibold text-blue-900">${d.judul}</td>
-          <td class="p-4"><span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded border border-blue-200">${d.kategori}</span></td>
-          <td class="p-4 font-mono text-slate-600">${d.tahun}</td>
+        <tr class="hover:bg-slate-50/80 transition duration-150">
+          <td class="p-4 font-semibold text-slate-800">${d.judul}</td>
+          <td class="p-4">
+            <span class="bg-blue-50 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-lg border border-blue-100">
+              ${d.kategori}
+            </span>
+          </td>
+          <td class="p-4 font-mono text-xs text-slate-600">${d.tahun}</td>
           <td class="p-4 text-xs text-slate-500">${d.uploaded_by}</td>
           <td class="p-4 text-center">
             <div class="flex items-center justify-center gap-2">
-              <a href="${d.file_url}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded inline-flex items-center gap-1 transition">
+              <a href="${d.file_url}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-lg inline-flex items-center gap-1 font-medium transition shadow-sm">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                Unduh / Lihat
+                Unduh
               </a>
               ${isAdmin ? `
-                <button onclick="deleteDoc('${d.id}')" class="bg-red-600 hover:bg-red-700 text-white text-xs px-2.5 py-1.5 rounded transition">
+                <button onclick="deleteDoc('${d.id}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs px-2.5 py-1.5 rounded-lg font-medium transition">
                   Hapus
                 </button>
               ` : ''}
@@ -355,7 +444,7 @@
       renderTable(filtered);
     }
 
-    /* --- FITUR SCANNER PINTAR (OCR & KAMERA) --- */
+    /* FITUR OCR SCANNER */
     function startCameraScanner() {
       const cameraArea = document.getElementById("cameraArea");
       const video = document.getElementById("webcam");
@@ -407,14 +496,11 @@
       }).then(({ data: { text } }) => {
         scanStatus.classList.add("hidden");
         
-        // Bersihkan hasil bacaan teks
         const cleanedText = text.replace(/[\r\n]+/g, " ").trim();
         if (cleanedText.length > 5) {
-          // Otomatis isi judul dari baris teratas
           const autoTitle = cleanedText.substring(0, 60);
           document.getElementById("upJudul").value = autoTitle;
 
-          // Deteksi tahun (4 digit angka, misal 2020-2029)
           const yearMatch = cleanedText.match(/\b(20[0-9]{2})\b/);
           if (yearMatch) {
             document.getElementById("upTahun").value = yearMatch[1];
@@ -428,7 +514,7 @@
       });
     }
 
-    /* --- HANDLER UPLOAD, EDIT, HAPUS --- */
+    /* CRUD HANDLERS */
     function submitUpload(e) {
       e.preventDefault();
       const fileInput = document.getElementById("upFile").files[0];
