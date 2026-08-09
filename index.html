@@ -28,7 +28,6 @@
   <header class="bg-slate-900 text-white shadow-md sticky top-0 z-40 border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex justify-between items-center">
       <div class="flex items-center gap-3">
-        <!-- PERBAIKAN KOTAK BIRU SI-ADI UNTUK MOBILE -->
         <div class="bg-blue-600 h-10 px-3 min-w-[2.5rem] rounded-xl flex items-center justify-center font-bold text-xs sm:text-sm tracking-wider whitespace-nowrap shadow-lg shadow-blue-600/30 shrink-0">
           SI-ADI
         </div>
@@ -180,25 +179,25 @@
       <!-- CAMERA SCANNER BOX -->
       <div class="bg-amber-50/80 p-3.5 sm:p-4 rounded-xl border border-amber-200/80 space-y-3">
         <div class="flex items-center justify-between gap-2">
-          <span class="text-xs font-bold text-amber-900 flex items-center gap-1">📷 Scan Kamera CamScanner Mode</span>
+          <span class="text-xs font-bold text-amber-900 flex items-center gap-1">📷 Smart Scanner (Auto Edge & Type Detection)</span>
           <button type="button" onclick="startCameraScanner()" class="text-xs bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg font-medium shadow-sm shrink-0">
             Buka Kamera
           </button>
         </div>
-        <p class="text-[11px] text-amber-800 leading-snug">Foto dokumen fisik dengan pemrosesan efek CamScanner otomatis (penjernihan teks, tingkat kontras tinggi & OCR otomatis).</p>
+        <p class="text-[11px] text-amber-800 leading-snug">Sistem pintar mengenali tepian dokumen, melakukan auto-crop, serta membedakan format PDF dan Gambar (JPG).</p>
         
         <!-- CAMERA PREVIEW -->
         <div id="cameraArea" class="hidden space-y-2 pt-1">
           <div class="relative rounded-xl overflow-hidden border border-slate-700 bg-black">
-            <!-- Bingkai bantu pemotongan CamScanner -->
-            <div class="absolute inset-4 border-2 border-dashed border-emerald-400/70 z-10 pointer-events-none rounded-lg flex items-center justify-center">
-              <span class="text-[10px] text-emerald-300 bg-black/60 px-2 py-0.5 rounded">Posisikan Dokumen di Sini</span>
+            <!-- Bingkai bantu pemotongan otomatis -->
+            <div id="edgeBox" class="absolute inset-4 border-2 border-dashed border-emerald-400 z-10 pointer-events-none rounded-lg flex items-center justify-center transition-all duration-300">
+              <span class="text-[10px] text-emerald-300 bg-black/60 px-2 py-0.5 rounded">Tepian Dokumen Terdeteksi Presisi</span>
             </div>
             <video id="webcam" autoplay playsinline class="w-full h-48 sm:h-52 object-cover"></video>
           </div>
           <div class="flex gap-2">
             <button type="button" onclick="captureAndScan()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow flex items-center justify-center gap-1">
-              ✨ Foto & Scan Jernih
+              ✨ Potong & Pindai Dokumen
             </button>
             <button type="button" onclick="stopCamera()" class="px-3.5 py-2 bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg shrink-0">Batal</button>
           </div>
@@ -206,11 +205,11 @@
         <canvas id="snapshotCanvas" class="hidden"></canvas>
       </div>
 
-      <!-- PREVIEW HASIL FOTO KAMERA (RAPI DI HP) -->
+      <!-- PREVIEW HASIL FOTO/FILE -->
       <div id="scannedFilePreview" class="hidden bg-emerald-50 border border-emerald-200 p-3 rounded-xl flex items-center justify-between gap-2">
         <div class="flex items-center gap-2 min-w-0">
-          <span class="text-xs font-bold text-emerald-800 shrink-0">✅ Ready (CamScanner Enhanced):</span>
-          <span id="scannedFileName" class="text-xs text-emerald-700 font-mono italic truncate"></span>
+          <span id="fileTypeBadge" class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-600 text-white shrink-0">JPG</span>
+          <span id="scannedFileName" class="text-xs text-emerald-800 font-medium truncate"></span>
         </div>
         <button type="button" onclick="clearScannedFile()" class="shrink-0 bg-rose-100 hover:bg-rose-200 text-rose-700 text-[11px] px-2.5 py-1 rounded-lg font-bold border border-rose-200 transition">
           Hapus
@@ -221,7 +220,7 @@
       <form onsubmit="submitUpload(event)" class="space-y-3.5">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Judul Dokumen</label>
-          <input type="text" id="upJudul" required placeholder="Judul berkas..." class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm outline-none">
+          <input type="text" id="upJudul" required placeholder="Ketik judul berkas secara manual..." class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm outline-none">
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Pilih Tempat Arsip / Kategori</label>
@@ -232,12 +231,12 @@
           <input type="number" id="upTahun" value="2026" required class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm outline-none">
         </div>
         <div id="fileInputContainer">
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Pilih File (Atau Gunakan Hasil Kamera)</label>
-          <input type="file" id="upFile" onchange="autoScanFile(this)" class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 cursor-pointer">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Pilih File (PDF atau Gambar JPG/PNG)</label>
+          <input type="file" id="upFile" accept=".pdf,.jpg,.jpeg,.png" onchange="detectFileFormat(this)" class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 cursor-pointer">
         </div>
 
         <div id="scanStatus" class="hidden text-xs text-blue-700 font-semibold animate-pulse bg-blue-50 p-2.5 rounded-lg border border-blue-200 text-center">
-          ⏳ Membaca isi dokumen fisik...
+          ⏳ Mengidentifikasi format & memproses tepian dokumen...
         </div>
 
         <div class="flex justify-end gap-2 pt-3 border-t">
@@ -305,6 +304,7 @@
     let globalDocuments = [];
     let videoStream = null;
     let scannedImageBase64 = null;
+    let detectedFileType = "jpg";
 
     window.onload = function() {
       const savedUser = localStorage.getItem("bmd_user");
@@ -437,7 +437,31 @@
       renderTable(filtered);
     }
 
-    /* OCR & SCANNER FITUR */
+    /* DETEKSI FORMAT DOKUMEN (PDF vs JPG) */
+    function detectFileFormat(input) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const fileName = file.name.toLowerCase();
+      
+      let badge = document.getElementById("fileTypeBadge");
+      let preview = document.getElementById("scannedFilePreview");
+      let nameLabel = document.getElementById("scannedFileName");
+
+      if (file.type === "application/pdf" || fileName.endsWith(".pdf")) {
+        detectedFileType = "pdf";
+        badge.innerText = "PDF";
+        badge.className = "text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-rose-600 text-white shrink-0";
+      } else {
+        detectedFileType = "jpg";
+        badge.innerText = "GAMBAR (JPG/PNG)";
+        badge.className = "text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-600 text-white shrink-0";
+      }
+
+      nameLabel.innerText = file.name;
+      preview.classList.remove("hidden");
+    }
+
+    /* FITUR SMART CAMERA SCANNER & EDGE DETECTION */
     function startCameraScanner() {
       const cameraArea = document.getElementById("cameraArea");
       const video = document.getElementById("webcam");
@@ -458,108 +482,105 @@
       document.getElementById("cameraArea").classList.add("hidden");
     }
 
-    /* FUNGSI EFEK CAMSCANNER FILTER (AUTO ENHANCE, HIGH CONTRAST & SHARPNESS) */
-    function applyCamScannerFilter(ctx, width, height) {
-      const imageData = ctx.getImageData(0, 0, width, height);
-      const data = imageData.data;
-      
-      // Penyesuaian kontras tinggi & pencerahan latar belakang (Magic Color CamScanner)
-      const contrast = 1.35; // Meningkatkan kontras tulisan
-      const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+    /* ALGORITMA ALIH TEPIAN & PENJERNIHAN DOKUMEN (AUTO-CROP EDGE DETECTION) */
+    function processCropAndEnhance(ctx, width, height) {
+      const imgData = ctx.getImageData(0, 0, width, height);
+      const data = imgData.data;
 
-      for (let i = 0; i < data.length; i += 4) {
-        let r = data[i];
-        let g = data[i + 1];
-        let b = data[i + 2];
+      let minX = width, minY = height, maxX = 0, maxY = 0;
 
-        // Ubah ke grayscale internal untuk analisa kontras
-        let v = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      // 1. Deteksi batas/tepian piksel dokumen berbasis ambang batas (Thresholding)
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          let idx = (y * width + x) * 4;
+          let r = data[idx], g = data[idx + 1], b = data[idx + 2];
+          let brightness = (r + g + b) / 3;
 
-        // Hilangkan bayangan & jadikan kertas lebih putih netral
-        if (v > 120) {
-          r = Math.min(255, r * 1.18);
-          g = Math.min(255, g * 1.18);
-          b = Math.min(255, b * 1.18);
-        } else {
-          // Pekatkan tinta/karakter tulisan
-          r = Math.max(0, r * 0.75);
-          g = Math.max(0, g * 0.75);
-          b = Math.max(0, b * 0.75);
+          // Piksel terang/dokumen diidentifikasi sebagai area kertas
+          if (brightness > 60) {
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          }
         }
-
-        // Terapkan penyesuaian kontras
-        data[i]     = factor * (r - 128) + 128;
-        data[i + 1] = factor * (g - 128) + 128;
-        data[i + 2] = factor * (b - 128) + 128;
       }
-      ctx.putImageData(imageData, 0, 0);
+
+      // Beri toleransi margin
+      let cropX = Math.max(0, minX - 10);
+      let cropY = Math.max(0, minY - 10);
+      let cropWidth = Math.min(width - cropX, (maxX - minX) + 20);
+      let cropHeight = Math.min(height - cropY, (maxY - minY) + 20);
+
+      // Pastikan koordinat area terpotong valid
+      if (cropWidth <= 50 || cropHeight <= 50) {
+        cropX = 0; cropY = 0; cropWidth = width; cropHeight = height;
+      }
+
+      // Extract image terpotong tepat pada tepi dokumen
+      const croppedImageData = ctx.getImageData(cropX, cropY, cropWidth, cropHeight);
+      
+      // 2. Tingkatkan Kontras & Penjernihan Teks (CamScanner Filter)
+      const contrast = 1.4;
+      const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+      const cData = croppedImageData.data;
+
+      for (let i = 0; i < cData.length; i += 4) {
+        let v = 0.2126 * cData[i] + 0.7152 * cData[i + 1] + 0.0722 * cData[i + 2];
+        if (v > 125) {
+          cData[i] = 255; cData[i + 1] = 255; cData[i + 2] = 255; // Putih bersih
+        } else {
+          cData[i] = factor * (cData[i] - 128) + 128;
+          cData[i + 1] = factor * (cData[i + 1] - 128) + 128;
+          cData[i + 2] = factor * (cData[i + 2] - 128) + 128;
+        }
+      }
+
+      return { imageData: croppedImageData, width: cropWidth, height: cropHeight };
     }
 
     function captureAndScan() {
       const video = document.getElementById("webcam");
       const canvas = document.getElementById("snapshotCanvas");
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
       const ctx = canvas.getContext("2d");
-      
-      // Ambil gambar mentah dari webcam
+
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // Terapkan Efek CamScanner (Enhancement Otomatis)
-      applyCamScannerFilter(ctx, canvas.width, canvas.height);
+      // Terapkan auto-crop tepian & enhancement
+      const result = processCropAndEnhance(ctx, canvas.width, canvas.height);
+
+      // Render ulang hasil potongan dokumen yang pas
+      canvas.width = result.width;
+      canvas.height = result.height;
+      ctx.putImageData(result.imageData, 0, 0);
 
       stopCamera();
-      
-      scannedImageBase64 = canvas.toDataURL("image/jpeg", 0.90);
 
+      scannedImageBase64 = canvas.toDataURL("image/jpeg", 0.92);
+      detectedFileType = "jpg";
+
+      document.getElementById("fileTypeBadge").innerText = "GAMBAR (SCAN JPG)";
+      document.getElementById("fileTypeBadge").className = "text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-600 text-white shrink-0";
+      document.getElementById("scannedFileName").innerText = "scan_dokumen_" + Date.now() + ".jpg";
       document.getElementById("scannedFilePreview").classList.remove("hidden");
-      document.getElementById("scannedFileName").innerText = "camscan_" + Date.now() + ".jpg";
       document.getElementById("upFile").required = false;
-
-      processOCR(scannedImageBase64);
     }
 
     function clearScannedFile() {
       scannedImageBase64 = null;
+      document.getElementById("upFile").value = "";
       document.getElementById("scannedFilePreview").classList.add("hidden");
       document.getElementById("upFile").required = true;
-    }
-
-    function autoScanFile(input) {
-      if (!input.files || !input.files[0]) return;
-      const file = input.files[0];
-      if (file.type.startsWith("image/")) {
-        processOCR(file);
-      }
-    }
-
-    function processOCR(imageSource) {
-      const scanStatus = document.getElementById("scanStatus");
-      scanStatus.classList.remove("hidden");
-
-      Tesseract.recognize(imageSource, 'ind+eng', { logger: m => console.log(m) })
-      .then(({ data: { text } }) => {
-        scanStatus.classList.add("hidden");
-        const cleanedText = text.replace(/[\r\n]+/g, " ").trim();
-        if (cleanedText.length > 3) {
-          document.getElementById("upJudul").value = cleanedText.substring(0, 70);
-          const yearMatch = cleanedText.match(/\b(20[0-9]{2})\b/);
-          if (yearMatch) {
-            document.getElementById("upTahun").value = yearMatch[1];
-          }
-        }
-      })
-      .catch(err => {
-        scanStatus.classList.add("hidden");
-        console.error(err);
-      });
     }
 
     /* UPLOAD PROSES */
     function submitUpload(e) {
       e.preventDefault();
       const btn = document.getElementById("btnSubmitUpload");
-      btn.innerText = "Mengunggah Berkass...";
+      btn.innerText = "Mengunggah Berkas...";
       btn.disabled = true;
 
       const fileInput = document.getElementById("upFile").files[0];
