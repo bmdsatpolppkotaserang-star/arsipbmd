@@ -613,6 +613,18 @@
       localStorage.removeItem("bmd_user");
       location.reload();
     }
+    // Registrasi Service Worker untuk PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then((reg) => {
+        console.log('PWA Service Worker berhasil didaftarkan:', reg.scope);
+      })
+      .catch((err) => {
+        console.error('PWA Service Worker gagal didaftarkan:', err);
+      });
+  });
+}
   </script>
 </body>
 </html>
